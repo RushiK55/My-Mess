@@ -1,0 +1,74 @@
+<resources>
+    <string name="app_name">MyMess</string>
+
+    <!-- Owner Panel - General -->
+    <string name="owner_dashboard">Owner Dashboard</string>
+    <string name="owner_dashboard_subtitle">Business snapshot and active requests</string>
+    <string name="enrolled_users">Enrolled Users</string>
+    <string name="pending_orders">Pending Orders</string>
+    <string name="todays_earnings">Today\'s Earnings</string>
+    <string name="requests_queue">Requests Queue</string>
+
+    <!-- Owner Panel - Metrics & Actions -->
+    <string name="accepted_preparing_orders">Accepted and preparing orders</string>
+    <string name="loading_pending_orders">Loading pending orders...</string>
+    <string name="loading_join_requests">Loading join requests...</string>
+    <string name="orders_in_progress">Orders in progress: </string>
+    <string name="pending_requests">Pending requests: </string>
+    <string name="no_pending_orders">No pending orders at this time</string>
+    <string name="no_join_requests">No join requests pending</string>
+
+    <!-- Owner Panel - Users -->
+    <string name="enrolled_users_management">Enrolled Users</string>
+    <string name="search_by_name_or_email">Search by name or email</string>
+    <string name="loading_users">Loading users...</string>
+    <string name="no_enrolled_users">No enrolled users yet</string>
+
+    <!-- Owner Panel - Payments -->
+    <string name="owner_payments">Owner Payments</string>
+    <string name="loading_owner_payments">Loading owner payments...</string>
+    <string name="search_by_user_name_status">Search by user name or status</string>
+    <string name="status_filter">Status filter</string>
+    <string name="bill_state">Bill state</string>
+    <string name="no_payments">No payment records</string>
+    <string name="payment_pending">Pending</string>
+    <string name="payment_paid">Paid</string>
+
+    <!-- Owner Panel - Analytics -->
+    <string name="owner_analytics">Owner Analytics</string>
+    <string name="loading_analytics">Loading analytics...</string>
+    <string name="analytics_summary_orders">Orders</string>
+    <string name="analytics_summary_revenue">Revenue</string>
+    <string name="orders_per_day">Orders per day</string>
+    <string name="revenue_trend">Revenue trend</string>
+    <string name="top_meals">Most ordered meals</string>
+    <string name="user_growth">User growth</string>
+
+    <!-- Owner Panel - Meals Management -->
+    <string name="meals_management">Meals Management</string>
+    <string name="mess_meals">Mess Meals</string>
+    <string name="cloud_meals">Cloud Meals</string>
+    <string name="add_meal">Add Meal</string>
+    <string name="edit">Edit</string>
+    <string name="disable">Disable</string>
+    <string name="delete">Delete</string>
+    <string name="no_meals">No meals added yet</string>
+
+    <!-- Owner Panel - Buttons & Actions -->
+    <string name="refresh">Refresh</string>
+    <string name="accept">Accept</string>
+    <string name="reject">Reject</string>
+    <string name="approve">Approve</string>
+    <string name="advance">Advance</string>
+    <string name="mark_paid">Mark Paid</string>
+    <string name="block_user">Block</string>
+    <string name="generate_bill">Generate Bill</string>
+
+    <!-- Owner Panel - Status Messages -->
+    <string name="request_updated">Request updated</string>
+    <string name="order_updated">Order status updated</string>
+    <string name="user_blocked">User blocked</string>
+    <string name="payment_marked_paid">Payment marked as paid</string>
+    <string name="action_success">Action completed</string>
+
+</resources>

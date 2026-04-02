@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Requested typography mapped to safe Android fallbacks to avoid runtime font dependency issues. -->
+    <style name="TextAppearance.MyMess.Owner.Heading" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:textColor">@color/owner_primary</item>
+    </style>
+
+    <style name="TextAppearance.MyMess.Owner.SectionTitle" parent="TextAppearance.MaterialComponents.Subtitle1">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/owner_primary</item>
+    </style>
+
+    <style name="TextAppearance.MyMess.Owner.Body" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/owner_secondary</item>
+    </style>
+
+    <style name="TextAppearance.MyMess.Owner.Data" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/owner_primary</item>
+    </style>
+
+    <style name="Widget.MyMess.Owner.Card" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">@color/owner_card_bg</item>
+        <item name="strokeColor">@color/owner_card_border</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="cardCornerRadius">8dp</item>
+        <item name="cardUseCompatPadding">false</item>
+    </style>
+
+    <style name="Widget.MyMess.Owner.ButtonAccent" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/owner_accent</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="Widget.MyMess.Owner.ButtonOutline" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="strokeColor">@color/owner_secondary</item>
+        <item name="android:textColor">@color/owner_secondary</item>
+    </style>
+
+</resources>
+
+

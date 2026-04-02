@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Typeface mapping: sans-serif-medium ~= Poppins semibold fallback, sans-serif ~= Inter fallback, monospace ~= Roboto Mono fallback -->
+    <style name="TextAppearance.MyMess.Admin.Heading" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/admin_primary</item>
+        <item name="android:textSize">22sp</item>
+    </style>
+
+    <style name="TextAppearance.MyMess.Admin.Title" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/admin_primary</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="TextAppearance.MyMess.Admin.Body" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textColor">@color/admin_text_secondary</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="TextAppearance.MyMess.Admin.Data" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:textColor">@color/admin_primary</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+</resources>
+

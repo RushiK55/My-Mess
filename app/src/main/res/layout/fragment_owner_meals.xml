@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/owner_bg"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Meals Management"
+        android:textAppearance="@style/TextAppearance.MyMess.Owner.Heading" />
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabMeals"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:tabIndicatorColor="@color/owner_accent"
+        app:tabSelectedTextColor="@color/owner_primary"
+        app:tabTextColor="@color/owner_secondary" />
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/vpMeals"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_weight="1" />
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavOwner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:backgroundTint="@color/owner_card_bg"
+        app:itemIconTint="@color/owner_primary"
+        app:itemTextColor="@color/owner_primary"
+        app:menu="@menu/owner_bottom_nav_menu" />
+
+</LinearLayout>
+

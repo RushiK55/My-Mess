@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/splashFragment">
+
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="com.example.mymess.presentation.common.SplashFragment"
+        android:label="Splash">
+        <action
+            android:id="@+id/action_splashFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_splashFragment_to_userHomeFragment"
+            app:destination="@id/userHomeFragment" />
+        <action
+            android:id="@+id/action_splashFragment_to_ownerHomeFragment"
+            app:destination="@id/ownerHomeFragment" />
+        <action
+            android:id="@+id/action_splashFragment_to_adminHomeFragment"
+            app:destination="@id/adminHomeFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.example.mymess.presentation.auth.LoginFragment"
+        android:label="Login">
+        <action
+            android:id="@+id/action_loginFragment_to_userHomeFragment"
+            app:destination="@id/userHomeFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_ownerHomeFragment"
+            app:destination="@id/ownerHomeFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_adminHomeFragment"
+            app:destination="@id/adminHomeFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/userHomeFragment"
+        android:name="com.example.mymess.presentation.user.UserHomeFragment"
+        android:label="User Home">
+        <action
+            android:id="@+id/action_userHomeFragment_to_userOrdersFragment"
+            app:destination="@id/userOrdersFragment" />
+        <action
+            android:id="@+id/action_userHomeFragment_to_userMessesFragment"
+            app:destination="@id/userMessesFragment" />
+        <action
+            android:id="@+id/action_userHomeFragment_to_userPaymentsFragment"
+            app:destination="@id/userPaymentsFragment" />
+        <action
+            android:id="@+id/action_userHomeFragment_to_userProfileFragment"
+            app:destination="@id/userProfileFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/userOrdersFragment"
+        android:name="com.example.mymess.presentation.user.UserOrdersFragment"
+        android:label="Order History" />
+
+    <fragment
+        android:id="@+id/userMessesFragment"
+        android:name="com.example.mymess.presentation.user.UserMessesFragment"
+        android:label="Browse Messes" />
+
+    <fragment
+        android:id="@+id/userPaymentsFragment"
+        android:name="com.example.mymess.presentation.user.UserPaymentsFragment"
+        android:label="User Payments" />
+
+    <fragment
+        android:id="@+id/userProfileFragment"
+        android:name="com.example.mymess.presentation.user.UserProfileFragment"
+        android:label="My Profile" />
+
+    <fragment
+        android:id="@+id/ownerHomeFragment"
+        android:name="com.example.mymess.presentation.owner.OwnerHomeFragment"
+        android:label="Owner Home">
+        <action
+            android:id="@+id/action_ownerHomeFragment_to_ownerPendingOrdersFragment"
+            app:destination="@id/ownerPendingOrdersFragment" />
+        <action
+            android:id="@+id/action_ownerHomeFragment_to_ownerEnrolledUsersFragment"
+            app:destination="@id/ownerEnrolledUsersFragment" />
+        <action
+            android:id="@+id/action_ownerHomeFragment_to_ownerRequestsFragment"
+            app:destination="@id/ownerRequestsFragment" />
+        <action
+            android:id="@+id/action_ownerHomeFragment_to_ownerProfileFragment"
+            app:destination="@id/ownerProfileFragment" />
+        <action
+            android:id="@+id/action_ownerHomeFragment_to_ownerPaymentsFragment"
+            app:destination="@id/ownerPaymentsFragment" />
+        <action
+            android:id="@+id/action_ownerHomeFragment_to_ownerBannersFragment"
+            app:destination="@id/ownerBannersFragment" />
+        <action
+            android:id="@+id/action_ownerHomeFragment_to_ownerMessMealsFragment"
+            app:destination="@id/ownerMessMealsFragment" />
+        <action
+            android:id="@+id/action_ownerHomeFragment_to_ownerCloudMealsFragment"
+            app:destination="@id/ownerCloudMealsFragment" />
+        <action
+            android:id="@+id/action_ownerHomeFragment_to_ownerMealsFragment"
+            app:destination="@id/ownerMealsFragment" />
+        <action
+            android:id="@+id/action_ownerHomeFragment_to_ownerAnalyticsFragment"
+            app:destination="@id/ownerAnalyticsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/ownerPendingOrdersFragment"
+        android:name="com.example.mymess.presentation.owner.OwnerPendingOrdersFragment"
+        android:label="Pending Orders" />
+
+    <fragment
+        android:id="@+id/ownerEnrolledUsersFragment"
+        android:name="com.example.mymess.presentation.owner.OwnerUsersFragment"
+        android:label="Enrolled Users" />
+
+    <fragment
+        android:id="@+id/ownerRequestsFragment"
+        android:name="com.example.mymess.presentation.owner.OwnerRequestsFragment"
+        android:label="Owner Requests" />
+
+    <fragment
+        android:id="@+id/ownerProfileFragment"
+        android:name="com.example.mymess.presentation.owner.OwnerProfileFragment"
+        android:label="Owner Profile" />
+
+    <fragment
+        android:id="@+id/ownerPaymentsFragment"
+        android:name="com.example.mymess.presentation.owner.OwnerPaymentsFragment"
+        android:label="Owner Payments" />
+
+    <fragment
+        android:id="@+id/ownerBannersFragment"
+        android:name="com.example.mymess.presentation.owner.OwnerBannersFragment"
+        android:label="Owner Banners" />
+
+    <fragment
+        android:id="@+id/ownerMessMealsFragment"
+        android:name="com.example.mymess.presentation.owner.OwnerMessMealsFragment"
+        android:label="Mess Meals" />
+
+    <fragment
+        android:id="@+id/ownerCloudMealsFragment"
+        android:name="com.example.mymess.presentation.owner.OwnerCloudMealsFragment"
+        android:label="Cloud Meals" />
+
+    <fragment
+        android:id="@+id/ownerMealsFragment"
+        android:name="com.example.mymess.presentation.owner.OwnerMealsFragment"
+        android:label="Meals" />
+
+    <fragment
+        android:id="@+id/ownerAnalyticsFragment"
+        android:name="com.example.mymess.presentation.owner.OwnerAnalyticsFragment"
+        android:label="Owner Analytics" />
+
+    <fragment
+        android:id="@+id/adminHomeFragment"
+        android:name="com.example.mymess.presentation.admin.AdminHomeFragment"
+        android:label="Admin Home">
+        <action
+            android:id="@+id/action_adminHomeFragment_to_adminUsersFragment"
+            app:destination="@id/adminUsersFragment" />
+        <action
+            android:id="@+id/action_adminHomeFragment_to_adminBannersFragment"
+            app:destination="@id/adminBannersFragment" />
+        <action
+            android:id="@+id/action_adminHomeFragment_to_adminAnalyticsFragment"
+            app:destination="@id/adminAnalyticsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminUsersFragment"
+        android:name="com.example.mymess.presentation.admin.AdminUsersFragment"
+        android:label="Admin Users" />
+
+    <fragment
+        android:id="@+id/adminBannersFragment"
+        android:name="com.example.mymess.presentation.admin.AdminBannersFragment"
+        android:label="Admin Banners" />
+
+    <fragment
+        android:id="@+id/adminAnalyticsFragment"
+        android:name="com.example.mymess.presentation.admin.AdminAnalyticsFragment"
+        android:label="Admin Analytics" />
+
+</navigation>
+

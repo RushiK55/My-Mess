@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="brand_primary">#0D47A1</color>
+    <color name="brand_on_primary">#FFFFFFFF</color>
+    <color name="brand_secondary">#1565C0</color>
+    <color name="brand_background">#F7F9FC</color>
+    <color name="brand_surface">#FFFFFFFF</color>
+    <color name="brand_error">#B3261E</color>
+    <color name="admin_primary">#2C3E66</color>
+    <color name="admin_bg">#FFFFFF</color>
+    <color name="admin_surface">#E9F0F5</color>
+    <color name="admin_surface_alt">#F8F9FA</color>
+    <color name="admin_accent">#E76F51</color>
+    <color name="admin_on_accent">#FFFFFFFF</color>
+    <color name="admin_text_primary">#2D3E50</color>
+    <color name="admin_text_secondary">#6C7A89</color>
+    <color name="admin_success">#2A9D8F</color>
+    <color name="admin_error">#E74C3C</color>
+    <color name="admin_warning">#E9C46A</color>
+    <color name="admin_divider">#D4DDE6</color>
+    <color name="owner_primary">#2C3E66</color>
+    <color name="owner_secondary">#6C7A89</color>
+    <color name="owner_accent">#F39C12</color>
+    <color name="owner_bg">#ECF0F1</color>
+    <color name="owner_card_bg">#FFFFFFFF</color>
+    <color name="owner_card_border">#D5DDE5</color>
+    <color name="owner_success">#2E7D32</color>
+    <color name="owner_danger">#B23A48</color>
+    <color name="owner_info">#2C7FB8</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

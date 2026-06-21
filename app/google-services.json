@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "635506535528",
+    "firebase_url": "https://messappflutter-default-rtdb.firebaseio.com",
+    "project_id": "messappflutter",
+    "storage_bucket": "messappflutter.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:635506535528:android:df2f35d68c04dbdecbdfdd",
+        "android_client_info": {
+          "package_name": "com.example.mymess"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFxU56bODfG4BTjolXwGX9ZK0MpEd3uB4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

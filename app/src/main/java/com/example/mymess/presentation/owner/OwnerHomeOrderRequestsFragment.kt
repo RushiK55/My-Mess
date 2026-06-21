@@ -11,8 +11,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.mymess.MainActivity
 import com.example.mymess.core.Resource
+import com.example.mymess.data.models.Order
+import com.example.mymess.databinding.BottomSheetOrderRequestDetailsBinding
 import com.example.mymess.databinding.FragmentOwnerHomeOrderRequestsBinding
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -37,18 +41,37 @@ class OwnerHomeOrderRequestsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Build adapter after fragment is attached so activityViewModels is safe to access.
-        adapter = OwnerOrderRequestsAdapter(
-            onAccept = { order -> viewModel.acceptOrder(order) },
-            onReject = { order -> viewModel.rejectOrder(order) },
-        )
+        adapter = OwnerOrderRequestsAdapter { order -> showOrderDetails(order) }
 
         binding.rvOrders.layoutManager = LinearLayoutManager(requireContext())
         binding.rvOrders.adapter = adapter
         observeUi()
     }
 
+    private fun showOrderDetails(order: Order) {
+        val sheetBinding = BottomSheetOrderRequestDetailsBinding.inflate(layoutInflater)
+        val dialog = BottomSheetDialog(requireContext())
+        dialog.setContentView(sheetBinding.root)
+
+        sheetBinding.tvSheetMealName.text = order.mealName
+        sheetBinding.tvSheetOrderMeta.text = "Qty: ${order.quantity} | Total: Rs ${order.totalPrice}"
+        sheetBinding.tvSheetInstructions.text = order.specialInstructions?.takeIf { it.isNotBlank() } ?: "No special instructions"
+
+        sheetBinding.btnSheetAccept.setOnClickListener {
+            viewModel.acceptOrder(order)
+            dialog.dismiss()
+        }
+
+        sheetBinding.btnSheetReject.setOnClickListener {
+            viewModel.rejectOrder(order)
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
     private fun observeUi() {
+        val mainActivity = activity as? MainActivity
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
@@ -74,9 +97,15 @@ class OwnerHomeOrderRequestsFragment : Fragment() {
                 launch {
                     viewModel.updateState.collect { state ->
                         when (state) {
-                            is Resource.Error -> Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
-                            Resource.Loading -> Unit
-                            is Resource.Success -> Toast.makeText(requireContext(), "Order updated", Toast.LENGTH_SHORT).show()
+                            is Resource.Error -> {
+                                mainActivity?.hideLoader()
+                                Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                            }
+                            Resource.Loading -> mainActivity?.showLoader("Updating order...")
+                            is Resource.Success -> {
+                                mainActivity?.hideLoader()
+                                Toast.makeText(requireContext(), "Order updated", Toast.LENGTH_SHORT).show()
+                            }
                             null -> Unit
                         }
                     }

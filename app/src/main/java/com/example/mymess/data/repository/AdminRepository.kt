@@ -1,6 +1,7 @@
 package com.example.mymess.data.repository
 
 import com.example.mymess.core.Resource
+import com.example.mymess.data.models.Mess
 import com.example.mymess.data.models.User
 
 interface AdminRepository {
@@ -10,5 +11,5 @@ interface AdminRepository {
     suspend fun getAllUsers(): Resource<List<User>>
     suspend fun updateUserStatus(userUid: String, status: String): Resource<Unit>
     suspend fun deleteUser(userUid: String): Resource<Unit>
+    suspend fun getMessByOwnerId(ownerUid: String): Resource<Mess>
 }
-

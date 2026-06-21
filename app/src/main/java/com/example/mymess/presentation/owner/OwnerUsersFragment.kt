@@ -14,13 +14,18 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.mymess.MainActivity
 import com.example.mymess.core.Resource
 import com.example.mymess.data.models.OwnerUserBillingDetails
 import com.example.mymess.data.models.User
-import com.example.mymess.data.models.category
+import com.example.mymess.databinding.BottomSheetOwnerUserDetailsBinding
 import com.example.mymess.databinding.FragmentOwnerUsersBinding
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @AndroidEntryPoint
 class OwnerUsersFragment : Fragment() {
@@ -52,21 +57,22 @@ class OwnerUsersFragment : Fragment() {
     }
 
     private fun observe() {
+        val mainActivity = activity as? MainActivity
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.usersState.collect { state ->
                         when (state) {
                             is Resource.Error -> {
-                                binding.progressBar.visibility = View.GONE
+                                mainActivity?.hideLoader()
                                 binding.tvInfo.text = state.message
                             }
                             Resource.Loading -> {
-                                binding.progressBar.visibility = View.VISIBLE
+                                mainActivity?.showLoader("Loading enrolled users...")
                                 binding.tvInfo.text = "Loading enrolled users..."
                             }
                             is Resource.Success -> {
-                                binding.progressBar.visibility = View.GONE
+                                mainActivity?.hideLoader()
                                 allUsers = state.data
                                 adapter.submitList(state.data)
                                 binding.tvInfo.text = "Enrolled users: ${state.data.size}"
@@ -79,20 +85,23 @@ class OwnerUsersFragment : Fragment() {
                     viewModel.billingDetailsState.collect { state ->
                         when (state) {
                             is Resource.Success -> {
+                                mainActivity?.hideLoader()
                                 val user = pendingUserForDetails
                                 if (user != null) {
-                                    showDetailsDialog(user, state.data)
+                                    showUserDetailsSheet(user, state.data)
                                     pendingUserForDetails = null
                                 }
                             }
                             is Resource.Error -> {
+                                mainActivity?.hideLoader()
                                 val user = pendingUserForDetails
                                 if (user != null) {
                                     Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
                                     pendingUserForDetails = null
                                 }
                             }
-                            Resource.Loading, null -> Unit
+                            Resource.Loading -> mainActivity?.showLoader("Loading billing info...")
+                            null -> Unit
                         }
                     }
                 }
@@ -100,9 +109,15 @@ class OwnerUsersFragment : Fragment() {
                 launch {
                     viewModel.actionState.collect { state ->
                         when (state) {
-                            is Resource.Error -> Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
-                            Resource.Loading -> Unit
-                            is Resource.Success -> Toast.makeText(requireContext(), "User blocked", Toast.LENGTH_SHORT).show()
+                            is Resource.Error -> {
+                                mainActivity?.hideLoader()
+                                Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                            }
+                            Resource.Loading -> mainActivity?.showLoader("Updating user status...")
+                            is Resource.Success -> {
+                                mainActivity?.hideLoader()
+                                Toast.makeText(requireContext(), "User status updated", Toast.LENGTH_SHORT).show()
+                            }
                             null -> Unit
                         }
                     }
@@ -111,9 +126,13 @@ class OwnerUsersFragment : Fragment() {
                 launch {
                     viewModel.billGenerationState.collect { state ->
                         when (state) {
-                            is Resource.Error -> Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
-                            Resource.Loading -> Unit
+                            is Resource.Error -> {
+                                mainActivity?.hideLoader()
+                                Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                            }
+                            Resource.Loading -> mainActivity?.showLoader("Generating bill...")
                             is Resource.Success -> {
+                                mainActivity?.hideLoader()
                                 Toast.makeText(requireContext(), "Bill generated", Toast.LENGTH_SHORT).show()
                                 val user = selectedUserForBillingAction
                                 if (user != null) {
@@ -143,50 +162,51 @@ class OwnerUsersFragment : Fragment() {
         viewModel.loadBillingDetails(user.uid)
     }
 
-    private fun showDetailsDialog(user: User, details: OwnerUserBillingDetails) {
+    private fun showUserDetailsSheet(user: User, details: OwnerUserBillingDetails) {
+        val sheetBinding = BottomSheetOwnerUserDetailsBinding.inflate(layoutInflater)
+        val dialog = BottomSheetDialog(requireContext())
+        dialog.setContentView(sheetBinding.root)
+
+        sheetBinding.tvUserName.text = user.name
+        sheetBinding.tvUserEmail.text = user.email
+        sheetBinding.tvUserPhone.text = user.phone.ifBlank { "No phone number" }
+        
+        val sdf = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+        sheetBinding.tvJoinDate.text = "Joined on ${sdf.format(Date(user.createdAt))}"
+
         val preview = details.billPreview
-        val mealsText = if (preview.items.isEmpty()) {
-            "No accepted mess meals in ${preview.periodLabel}"
+        sheetBinding.tvBillPeriod.text = "Period: ${preview.periodLabel}"
+        
+        if (preview.items.isEmpty()) {
+            sheetBinding.tvBillDetails.text = "No accepted mess meals in this period."
         } else {
-            preview.items.joinToString("\n") { "${it.mealName} x${it.quantity} = Rs ${it.amount}" }
-        }
-
-        val paymentText = if (details.paymentHistory.isEmpty()) {
-            "No payment history"
-        } else {
-            details.paymentHistory.take(5).joinToString("\n") {
-                val kind = if (it.category() == "mess_bill") "Bill" else "Cloud"
-                "$kind | Rs ${it.amount} - ${it.status}"
+            val detailsText = preview.items.joinToString("\n") { 
+                "${it.mealName} x${it.quantity} = Rs ${it.amount}" 
             }
+            sheetBinding.tvBillDetails.text = detailsText
         }
-        val joinDate = java.text.SimpleDateFormat("dd MMM yyyy").format(java.util.Date(user.createdAt))
-        val info = buildString {
-            append("Name: ${user.name}\n")
-            append("Phone: ${user.phone}\n")
-            append("Email: ${user.email}\n")
-            append("Join Date: $joinDate\n\n")
-            append("Bill Preview (${preview.periodLabel}):\n")
-            append(mealsText)
-            append("\n\nTotal: Rs ${preview.totalAmount}\n")
-            append(if (preview.alreadyGenerated) "Status: Bill already generated" else "Status: Bill not generated")
-            append("\n\nPayment History:\n$paymentText")
-            if (!user.blockReason.isNullOrBlank()) append("\n\nBlock reason: ${user.blockReason}")
+        sheetBinding.tvBillTotal.text = "Total: Rs ${preview.totalAmount}"
+
+        sheetBinding.btnGenerateBill.visibility = if (preview.canGenerate) View.VISIBLE else View.GONE
+        sheetBinding.btnGenerateBill.setOnClickListener {
+            selectedUserForBillingAction = user
+            viewModel.generateBillForUser(user.uid)
+            dialog.dismiss()
         }
 
-        val builder = AlertDialog.Builder(requireContext())
-            .setTitle("User Details")
-            .setMessage(info)
-            .setPositiveButton("Close", null)
-            .setNegativeButton("Block") { _, _ -> askBlockReason(user) }
-
-        if (preview.canGenerate) {
-            builder.setNeutralButton("Generate Bill") { _, _ ->
-                selectedUserForBillingAction = user
-                viewModel.generateBillForUser(user.uid)
+        sheetBinding.btnBlock.text = if (user.status == "blocked") "Unblock User" else "Block User"
+        sheetBinding.btnBlock.setOnClickListener {
+            if (user.status == "blocked") {
+                viewModel.blockUser(user.uid, "") // Assuming empty reason means unblock or handled in VM
+            } else {
+                askBlockReason(user)
             }
+            dialog.dismiss()
         }
 
-        builder.show()
+        sheetBinding.btnClose.setOnClickListener { dialog.dismiss() }
+
+        dialog.show()
     }
 
     private fun askBlockReason(user: User) {
@@ -194,7 +214,7 @@ class OwnerUsersFragment : Fragment() {
         AlertDialog.Builder(requireContext())
             .setTitle("Block ${user.name}")
             .setView(input)
-            .setMessage("Enter reason")
+            .setMessage("Enter reason for blocking")
             .setPositiveButton("Confirm") { _, _ ->
                 viewModel.blockUser(user.uid, input.text?.toString().orEmpty())
             }

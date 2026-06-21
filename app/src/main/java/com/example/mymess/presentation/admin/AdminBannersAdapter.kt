@@ -5,12 +5,13 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
+import com.example.mymess.R
 import com.example.mymess.data.models.Banner
 import com.example.mymess.databinding.ItemAdminBannerManageBinding
 
 class AdminBannersAdapter(
-    private val onEdit: (Banner) -> Unit,
-    private val onDelete: (Banner) -> Unit,
+    private val onItemClick: (Banner) -> Unit,
 ) : ListAdapter<Banner, AdminBannersAdapter.BannerViewHolder>(BannerDiff) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BannerViewHolder {
@@ -25,16 +26,20 @@ class AdminBannersAdapter(
     inner class BannerViewHolder(private val binding: ItemAdminBannerManageBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: Banner) {
             binding.tvTitle.text = item.title
-            binding.tvMeta.text = "target=${item.targetRole} | active=${item.isActive}"
-            binding.btnEdit.setOnClickListener { onEdit(item) }
-            binding.btnDelete.setOnClickListener { onDelete(item) }
+            binding.tvMeta.text = "Target: ${item.targetRole.replaceFirstChar { it.uppercase() }} | ${if (item.isActive) "Active" else "Inactive"}"
+            
+            binding.ivBannerPreview.load(item.imageUrl) {
+                crossfade(true)
+                placeholder(R.color.admin_divider)
+                error(R.color.admin_divider)
+            }
+
+            binding.root.setOnClickListener { onItemClick(item) }
         }
     }
 
     private object BannerDiff : DiffUtil.ItemCallback<Banner>() {
         override fun areItemsTheSame(oldItem: Banner, newItem: Banner): Boolean = oldItem.bannerId == newItem.bannerId
-
         override fun areContentsTheSame(oldItem: Banner, newItem: Banner): Boolean = oldItem == newItem
     }
 }
-

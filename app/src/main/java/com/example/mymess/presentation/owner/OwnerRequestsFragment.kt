@@ -11,8 +11,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.mymess.MainActivity
 import com.example.mymess.core.Resource
+import com.example.mymess.data.models.JoinRequestWithUser
+import com.example.mymess.databinding.BottomSheetJoinRequestDetailsBinding
 import com.example.mymess.databinding.FragmentOwnerRequestsBinding
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -23,10 +27,7 @@ class OwnerRequestsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: OwnerRequestsViewModel by viewModels()
-    private val adapter = OwnerJoinRequestsAdapter(
-        onApprove = { viewModel.approve(it.request.requestId) },
-        onReject = { viewModel.reject(it.request.requestId) },
-    )
+    private val adapter = OwnerJoinRequestsAdapter { request -> showJoinRequestDetails(request) }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -46,24 +47,47 @@ class OwnerRequestsFragment : Fragment() {
         viewModel.loadRequests()
     }
 
+    private fun showJoinRequestDetails(item: JoinRequestWithUser) {
+        val sheetBinding = BottomSheetJoinRequestDetailsBinding.inflate(layoutInflater)
+        val dialog = BottomSheetDialog(requireContext())
+        dialog.setContentView(sheetBinding.root)
+
+        sheetBinding.tvSheetUserName.text = item.user?.name ?: "User ${item.request.userId.takeLast(6)}"
+        sheetBinding.tvSheetUserEmail.text = item.user?.email ?: "No email available"
+        sheetBinding.tvSheetUserPhone.text = item.user?.phone ?: "No phone available"
+
+        sheetBinding.btnSheetApprove.setOnClickListener {
+            viewModel.approve(item.request.requestId)
+            dialog.dismiss()
+        }
+
+        sheetBinding.btnSheetReject.setOnClickListener {
+            viewModel.reject(item.request.requestId)
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
     private fun observeState() {
+        val mainActivity = activity as? MainActivity
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.requestsState.collect { state ->
                         when (state) {
                             is Resource.Error -> {
-                                binding.progressBar.visibility = View.GONE
+                                mainActivity?.hideLoader()
                                 binding.tvInfo.text = state.message
                             }
 
                             Resource.Loading -> {
-                                binding.progressBar.visibility = View.VISIBLE
+                                mainActivity?.showLoader("Loading join requests...")
                                 binding.tvInfo.text = "Loading join requests..."
                             }
 
                             is Resource.Success -> {
-                                binding.progressBar.visibility = View.GONE
+                                mainActivity?.hideLoader()
                                 adapter.submitList(state.data)
                                 binding.tvInfo.text = "Pending requests: ${state.data.size}"
                             }
@@ -73,9 +97,15 @@ class OwnerRequestsFragment : Fragment() {
                 launch {
                     viewModel.actionState.collect { state ->
                         when (state) {
-                            is Resource.Error -> Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
-                            Resource.Loading -> Unit
-                            is Resource.Success -> Toast.makeText(requireContext(), "Request updated", Toast.LENGTH_SHORT).show()
+                            is Resource.Error -> {
+                                mainActivity?.hideLoader()
+                                Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                            }
+                            Resource.Loading -> mainActivity?.showLoader("Updating request...")
+                            is Resource.Success -> {
+                                mainActivity?.hideLoader()
+                                Toast.makeText(requireContext(), "Request updated", Toast.LENGTH_SHORT).show()
+                            }
                             null -> Unit
                         }
                     }
@@ -89,4 +119,3 @@ class OwnerRequestsFragment : Fragment() {
         _binding = null
     }
 }
-

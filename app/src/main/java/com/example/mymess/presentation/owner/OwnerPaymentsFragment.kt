@@ -13,6 +13,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.mymess.MainActivity
 import com.example.mymess.core.Resource
 import com.example.mymess.data.models.PaymentRecord
 import com.example.mymess.data.models.category
@@ -88,23 +89,24 @@ class OwnerPaymentsFragment : Fragment() {
     }
 
     private fun observeState() {
+        val mainActivity = activity as? MainActivity
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.paymentsState.collect { state ->
                         when (state) {
                             is Resource.Error -> {
-                                binding.progressBar.visibility = View.GONE
+                                mainActivity?.hideLoader()
                                 binding.tvInfo.text = state.message
                             }
 
                             Resource.Loading -> {
-                                binding.progressBar.visibility = View.VISIBLE
+                                mainActivity?.showLoader("Loading payments...")
                                 binding.tvInfo.text = "Loading owner payments..."
                             }
 
                             is Resource.Success -> {
-                                binding.progressBar.visibility = View.GONE
+                                mainActivity?.hideLoader()
                                 allPayments = state.data
                                 applyFilters()
                             }
@@ -114,9 +116,15 @@ class OwnerPaymentsFragment : Fragment() {
                 launch {
                     viewModel.actionState.collect { state ->
                         when (state) {
-                            is Resource.Error -> Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
-                            Resource.Loading -> Unit
-                            is Resource.Success -> Toast.makeText(requireContext(), "Payment marked paid", Toast.LENGTH_SHORT).show()
+                            is Resource.Error -> {
+                                mainActivity?.hideLoader()
+                                Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                            }
+                            Resource.Loading -> mainActivity?.showLoader("Marking as paid...")
+                            is Resource.Success -> {
+                                mainActivity?.hideLoader()
+                                Toast.makeText(requireContext(), "Payment marked paid", Toast.LENGTH_SHORT).show()
+                            }
                             null -> Unit
                         }
                     }

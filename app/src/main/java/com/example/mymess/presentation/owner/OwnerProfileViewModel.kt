@@ -1,7 +1,9 @@
 package com.example.mymess.presentation.owner
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mymess.core.ImageUploader
 import com.example.mymess.core.Resource
 import com.example.mymess.core.SessionManager
 import com.example.mymess.data.models.Mess
@@ -19,6 +21,7 @@ class OwnerProfileViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val authRepository: AuthRepository,
     private val sessionManager: SessionManager,
+    private val imageUploader: ImageUploader,
 ) : ViewModel() {
 
     private val _messState = MutableStateFlow<Resource<Mess>>(Resource.Loading)
@@ -50,7 +53,9 @@ class OwnerProfileViewModel @Inject constructor(
         }
     }
 
-    fun save(mess: Mess) {
+    // --- Mess Flow ---
+
+    fun saveMessDetails(mess: Mess) {
         val ownerUid = sessionManager.getUid() ?: return
         viewModelScope.launch {
             _saveState.value = Resource.Loading
@@ -59,12 +64,72 @@ class OwnerProfileViewModel @Inject constructor(
         }
     }
 
-    fun saveOwnerProfile(name: String, phone: String) {
+    fun updateMessImage(imageUri: Uri) {
+        val ownerUid = sessionManager.getUid() ?: return
+        viewModelScope.launch {
+            _saveState.value = Resource.Loading
+            
+            when (val uploadResult = imageUploader.uploadImage(imageUri)) {
+                is Resource.Success -> {
+                    val imageUrl = uploadResult.data
+                    val currentMessRes = _messState.value
+                    if (currentMessRes is Resource.Success) {
+                        val updatedMess = currentMessRes.data.copy(imageUrl = imageUrl)
+                        _saveState.value = ownerRepository.updateOwnerMess(ownerUid, updatedMess)
+                        loadMess()
+                    } else {
+                        _saveState.value = Resource.Error("Cannot update image: Mess details not loaded")
+                    }
+                }
+                is Resource.Error -> {
+                    _saveState.value = Resource.Error("Mess image upload failed: ${uploadResult.message}")
+                }
+                Resource.Loading -> Unit
+            }
+        }
+    }
+
+    // --- Owner Flow ---
+
+    fun saveOwnerDetails(name: String, phone: String) {
         val ownerUid = sessionManager.getUid() ?: return
         viewModelScope.launch {
             _profileSaveState.value = Resource.Loading
-            _profileSaveState.value = authRepository.updateUserProfile(ownerUid, name, phone)
+            
+            val currentUser = (_ownerState.value as? Resource.Success)?.data
+            val existingPic = currentUser?.profilePic
+            
+            _profileSaveState.value = authRepository.updateUserProfile(ownerUid, name, phone, existingPic)
             _ownerState.value = authRepository.getUserByUid(ownerUid)
+        }
+    }
+
+    fun updateOwnerProfilePic(profilePicUri: Uri) {
+        val ownerUid = sessionManager.getUid() ?: return
+        viewModelScope.launch {
+            _profileSaveState.value = Resource.Loading
+
+            when (val uploadResult = imageUploader.uploadImage(profilePicUri)) {
+                is Resource.Success -> {
+                    val profilePicUrl = uploadResult.data
+                    val currentUser = (_ownerState.value as? Resource.Success)?.data
+                    if (currentUser != null) {
+                        _profileSaveState.value = authRepository.updateUserProfile(
+                            ownerUid, 
+                            currentUser.name, 
+                            currentUser.phone, 
+                            profilePicUrl
+                        )
+                        _ownerState.value = authRepository.getUserByUid(ownerUid)
+                    } else {
+                        _profileSaveState.value = Resource.Error("User profile not loaded")
+                    }
+                }
+                is Resource.Error -> {
+                    _profileSaveState.value = Resource.Error("Profile pic upload failed: ${uploadResult.message}")
+                }
+                Resource.Loading -> Unit
+            }
         }
     }
 
@@ -98,4 +163,3 @@ class OwnerProfileViewModel @Inject constructor(
         _logoutState.value = true
     }
 }
-

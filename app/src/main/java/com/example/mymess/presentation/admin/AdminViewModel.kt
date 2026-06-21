@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.mymess.core.Resource
 import com.example.mymess.data.models.AnalyticsSummary
 import com.example.mymess.data.models.Banner
+import com.example.mymess.data.models.Mess
 import com.example.mymess.data.models.User
 import com.example.mymess.data.repository.AdminRepository
 import com.example.mymess.data.repository.AnalyticsRepository
@@ -70,5 +71,8 @@ class AdminViewModel @Inject constructor(
             _summaryState.value = analyticsRepository.getAdminAnalytics()
         }
     }
-}
 
+    suspend fun getOwnerMess(ownerUid: String): Resource<Mess> {
+        return adminRepository.getMessByOwnerId(ownerUid)
+    }
+}

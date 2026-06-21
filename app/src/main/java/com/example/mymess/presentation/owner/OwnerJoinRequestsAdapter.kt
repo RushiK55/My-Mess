@@ -9,8 +9,7 @@ import com.example.mymess.data.models.JoinRequestWithUser
 import com.example.mymess.databinding.ItemJoinRequestBinding
 
 class OwnerJoinRequestsAdapter(
-    private val onApprove: (JoinRequestWithUser) -> Unit,
-    private val onReject: (JoinRequestWithUser) -> Unit,
+    private val onItemClick: (JoinRequestWithUser) -> Unit,
 ) : ListAdapter<JoinRequestWithUser, OwnerJoinRequestsAdapter.RequestViewHolder>(RequestDiff) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RequestViewHolder {
@@ -24,10 +23,9 @@ class OwnerJoinRequestsAdapter(
 
     inner class RequestViewHolder(private val binding: ItemJoinRequestBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: JoinRequestWithUser) {
-            binding.tvTop.text = item.user?.name ?: "User ${item.request.userId.take(6)}..."
+            binding.tvTop.text = item.user?.name ?: "User ${item.request.userId.takeLast(6)}"
             binding.tvMeta.text = item.user?.email ?: "No email"
-            binding.btnApprove.setOnClickListener { onApprove(item) }
-            binding.btnReject.setOnClickListener { onReject(item) }
+            binding.root.setOnClickListener { onItemClick(item) }
         }
     }
 
@@ -41,4 +39,3 @@ class OwnerJoinRequestsAdapter(
         }
     }
 }
-

@@ -1,7 +1,9 @@
 package com.example.mymess.presentation.auth
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mymess.core.ImageUploader
 import com.example.mymess.core.Resource
 import com.example.mymess.core.SessionManager
 import com.example.mymess.data.models.Mess
@@ -17,6 +19,7 @@ import kotlinx.coroutines.launch
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val sessionManager: SessionManager,
+    private val imageUploader: ImageUploader,
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow<Resource<User>?>(null)
@@ -42,6 +45,7 @@ class AuthViewModel @Inject constructor(
         phone: String,
         password: String,
         role: String,
+        profileImageUri: Uri?,
         messName: String,
         messAddress: String,
         messCity: String,
@@ -56,13 +60,30 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             _authState.value = Resource.Loading
             val normalizedRole = if (role == "owner") "owner" else "user"
-            if (
-                normalizedRole == "owner" &&
-                (messName.isBlank() || messAddress.isBlank() || messCity.isBlank() || messContact.isBlank())
-            ) {
-                _authState.value = Resource.Error("All owner mess details are required")
-                return@launch
+            
+            if (normalizedRole == "owner") {
+                if (messName.isBlank() || messAddress.isBlank() || messCity.isBlank() || messContact.isBlank()) {
+                    _authState.value = Resource.Error("All owner mess details are required")
+                    return@launch
+                }
+                if (profileImageUri == null) {
+                    _authState.value = Resource.Error("Profile image is required for owner verification")
+                    return@launch
+                }
             }
+
+            var profilePicUrl: String? = null
+            if (profileImageUri != null) {
+                when (val uploadResult = imageUploader.uploadImage(profileImageUri)) {
+                    is Resource.Success -> profilePicUrl = uploadResult.data
+                    is Resource.Error -> {
+                        _authState.value = Resource.Error("Image upload failed: ${uploadResult.message}")
+                        return@launch
+                    }
+                    Resource.Loading -> {} // Handled by outer Loading state
+                }
+            }
+
             val user = User(
                 uid = "",
                 name = name,
@@ -71,7 +92,9 @@ class AuthViewModel @Inject constructor(
                 password = password,
                 role = normalizedRole,
                 status = if (normalizedRole == "owner") "pending" else "approved",
+                profilePic = profilePicUrl
             )
+            
             val ownerMessDraft = if (normalizedRole == "owner") {
                 Mess(
                     name = messName.trim(),
@@ -84,6 +107,7 @@ class AuthViewModel @Inject constructor(
             } else {
                 null
             }
+            
             val result = authRepository.register(user, ownerMessDraft)
             if (result is Resource.Success && result.data.status == "approved") {
                 sessionManager.saveSession(result.data.uid, result.data.role)
@@ -116,5 +140,3 @@ class AuthViewModel @Inject constructor(
         _forgotPasswordState.value = null
     }
 }
-
-

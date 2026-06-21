@@ -61,12 +61,16 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
-    
+
     implementation(libs.hilt.android)
+    implementation(libs.firebase.messaging)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.fragment)
 
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    
+    // Cloudinary
+    implementation("com.cloudinary:cloudinary-android:3.1.2")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

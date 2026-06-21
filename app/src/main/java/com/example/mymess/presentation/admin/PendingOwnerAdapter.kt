@@ -5,6 +5,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
+import com.example.mymess.R
 import com.example.mymess.data.models.User
 import com.example.mymess.databinding.ItemPendingOwnerBinding
 
@@ -27,6 +29,13 @@ class PendingOwnerAdapter(
         fun bind(item: User) {
             binding.tvName.text = item.name
             binding.tvMeta.text = "${item.email} | ${item.phone}"
+            
+            binding.ivUserAvatar.load(item.profilePic) {
+                placeholder(android.R.drawable.ic_menu_myplaces)
+                error(android.R.drawable.ic_menu_myplaces)
+                crossfade(true)
+            }
+            
             binding.btnApprove.setOnClickListener { onApprove(item) }
             binding.btnReject.setOnClickListener { onReject(item) }
             binding.root.setOnClickListener { onOpenDetails(item) }
@@ -39,4 +48,3 @@ class PendingOwnerAdapter(
         override fun areContentsTheSame(oldItem: User, newItem: User): Boolean = oldItem == newItem
     }
 }
-

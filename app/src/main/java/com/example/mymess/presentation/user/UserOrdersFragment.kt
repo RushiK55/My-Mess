@@ -1,11 +1,12 @@
 package com.example.mymess.presentation.user
 
-import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -14,11 +15,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.mymess.MainActivity
 import com.example.mymess.R
 import com.example.mymess.core.Resource
 import com.example.mymess.data.models.Order
 import com.example.mymess.data.models.source
+import com.example.mymess.databinding.BottomSheetOrderDetailsBinding
 import com.example.mymess.databinding.FragmentUserOrdersBinding
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -85,21 +89,40 @@ class UserOrdersFragment : Fragment() {
     }
 
     private fun showOrderDetails(order: Order) {
+        val sheetBinding = BottomSheetOrderDetailsBinding.inflate(layoutInflater)
+        val dialog = BottomSheetDialog(requireContext())
+        dialog.setContentView(sheetBinding.root)
+
         val format = SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault())
-        val instructions = order.specialInstructions?.takeIf { it.isNotBlank() } ?: "None"
-        AlertDialog.Builder(requireContext())
-            .setTitle(order.mealName)
-            .setMessage(
-                "Quantity: ${order.quantity}\n" +
-                    "Order source: ${order.source()}\n" +
-                    "Total: Rs ${order.totalPrice}\n" +
-                    "Status: ${order.status}\n" +
-                    "Payment: ${order.paymentStatus}\n" +
-                    "Special instructions: $instructions\n" +
-                    "Placed at: ${format.format(Date(order.createdAt))}"
-            )
-            .setPositiveButton("Close", null)
-            .show()
+        
+        sheetBinding.tvOrderMealName.text = order.mealName
+        sheetBinding.tvOrderQuantity.text = order.quantity.toString()
+        sheetBinding.tvOrderTotal.text = "Rs ${order.totalPrice}"
+        sheetBinding.tvOrderStatus.text = order.status
+        sheetBinding.tvOrderPayment.text = order.paymentStatus.replaceFirstChar { it.uppercase() }
+        sheetBinding.tvOrderInstructions.text = order.specialInstructions?.takeIf { it.isNotBlank() } ?: "No special instructions"
+        sheetBinding.tvOrderDate.text = "Placed at: ${format.format(Date(order.createdAt))}"
+
+        val source = order.source()
+        sheetBinding.chipOrderSource.text = source.replaceFirstChar { it.uppercase() }
+        if (source.equals("cloud", ignoreCase = true)) {
+            sheetBinding.chipOrderSource.setChipBackgroundColorResource(R.color.admin_divider)
+            sheetBinding.chipOrderSource.setTextColor(ContextCompat.getColor(requireContext(), R.color.admin_primary))
+        } else {
+            sheetBinding.chipOrderSource.setChipBackgroundColorResource(R.color.admin_surface_alt)
+            sheetBinding.chipOrderSource.setTextColor(ContextCompat.getColor(requireContext(), R.color.admin_text_secondary))
+        }
+
+        val statusColor = when (order.status.lowercase()) {
+            "delivered", "ready" -> ContextCompat.getColor(requireContext(), R.color.admin_success)
+            "cancelled" -> ContextCompat.getColor(requireContext(), R.color.admin_error)
+            "pending" -> ContextCompat.getColor(requireContext(), R.color.admin_warning)
+            else -> ContextCompat.getColor(requireContext(), R.color.admin_primary)
+        }
+        sheetBinding.tvOrderStatus.setTextColor(statusColor)
+
+        sheetBinding.btnCloseSheet.setOnClickListener { dialog.dismiss() }
+        dialog.show()
     }
 
     private fun applyFilters() {
@@ -124,22 +147,23 @@ class UserOrdersFragment : Fragment() {
     }
 
     private fun observeState() {
+        val mainActivity = activity as? MainActivity
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.historyState.collect { state ->
                     when (state) {
                         is Resource.Error -> {
-                            binding.progressBar.visibility = View.GONE
+                            mainActivity?.hideLoader()
                             binding.tvInfo.text = state.message
                         }
 
                         Resource.Loading -> {
-                            binding.progressBar.visibility = View.VISIBLE
+                            mainActivity?.showLoader("Loading order history...")
                             binding.tvInfo.text = "Loading orders..."
                         }
 
                         is Resource.Success -> {
-                            binding.progressBar.visibility = View.GONE
+                            mainActivity?.hideLoader()
                             allOrders = state.data
                             applyFilters()
                         }

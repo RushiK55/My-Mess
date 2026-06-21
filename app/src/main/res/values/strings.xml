@@ -11,8 +11,8 @@
 
     <!-- Owner Panel - Metrics & Actions -->
     <string name="accepted_preparing_orders">Accepted and preparing orders</string>
-    <string name="loading_pending_orders">Loading pending orders...</string>
-    <string name="loading_join_requests">Loading join requests...</string>
+    <string name="loading_pending_orders">Loading pending orders…</string>
+    <string name="loading_join_requests">Loading join requests…</string>
     <string name="orders_in_progress">Orders in progress: </string>
     <string name="pending_requests">Pending requests: </string>
     <string name="no_pending_orders">No pending orders at this time</string>
@@ -21,12 +21,12 @@
     <!-- Owner Panel - Users -->
     <string name="enrolled_users_management">Enrolled Users</string>
     <string name="search_by_name_or_email">Search by name or email</string>
-    <string name="loading_users">Loading users...</string>
+    <string name="loading_users">Loading users…</string>
     <string name="no_enrolled_users">No enrolled users yet</string>
 
     <!-- Owner Panel - Payments -->
     <string name="owner_payments">Owner Payments</string>
-    <string name="loading_owner_payments">Loading owner payments...</string>
+    <string name="loading_owner_payments">Loading owner payments…</string>
     <string name="search_by_user_name_status">Search by user name or status</string>
     <string name="status_filter">Status filter</string>
     <string name="bill_state">Bill state</string>
@@ -36,7 +36,7 @@
 
     <!-- Owner Panel - Analytics -->
     <string name="owner_analytics">Owner Analytics</string>
-    <string name="loading_analytics">Loading analytics...</string>
+    <string name="loading_analytics">Loading analytics…</string>
     <string name="analytics_summary_orders">Orders</string>
     <string name="analytics_summary_revenue">Revenue</string>
     <string name="orders_per_day">Orders per day</string>
@@ -70,5 +70,24 @@
     <string name="user_blocked">User blocked</string>
     <string name="payment_marked_paid">Payment marked as paid</string>
     <string name="action_success">Action completed</string>
+
+    <!-- Admin Users UI -->
+    <string name="admin_users_title">Users</string>
+    <string name="chip_all">All</string>
+    <string name="chip_owner">Owner</string>
+    <string name="chip_renter">Renter</string>
+    <string name="chip_admin">Admin</string>
+    <string name="user_action_title">%1$s user</string>
+    <string name="user_action_confirm_message">Are you sure you want to %1$s %2$s?</string>
+    <string name="delete_user_title">Delete user</string>
+    <string name="confirm_delete_user">Delete %1$s? This action cannot be undone.</string>
+    <string name="email_label">Email: %1$s</string>
+    <string name="phone_label">Phone: %1$s</string>
+    <string name="role_label">Role: %1$s</string>
+    <string name="status_label">Status: %1$s</string>
+    <string name="unblock_user">Unblock</string>
+    <string name="unblock_user_label">Unblock user</string>
+    <string name="block_user_label">Block user</string>
+    <string name="total_users">Total users: %1$d</string>
 
 </resources>

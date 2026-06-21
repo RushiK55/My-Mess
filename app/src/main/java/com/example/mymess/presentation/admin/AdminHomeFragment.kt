@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -13,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import coil.load
 import com.example.mymess.R
 import com.example.mymess.core.Resource
 import com.example.mymess.data.models.User
@@ -152,13 +155,33 @@ class AdminHomeFragment : Fragment() {
     }
 
     private fun showOwnerDetails(user: User) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_admin_owner_details, null)
+        val ivProfile = dialogView.findViewById<ImageView>(R.id.ivVerificationImage)
+        val tvName = dialogView.findViewById<TextView>(R.id.tvOwnerName)
+        val tvEmail = dialogView.findViewById<TextView>(R.id.tvOwnerEmail)
+        val tvPhone = dialogView.findViewById<TextView>(R.id.tvOwnerPhone)
+        val tvMess = dialogView.findViewById<TextView>(R.id.tvMessDetails)
+
+        tvName.text = user.name
+        tvEmail.text = user.email
+        tvPhone.text = user.phone
+        
+        ivProfile.load(user.profilePic) {
+            placeholder(R.color.admin_divider)
+            error(R.color.admin_divider)
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val messResult = viewModel.getOwnerMess(user.uid)
+            if (messResult is Resource.Success) {
+                tvMess.text = "${messResult.data.name}\n${messResult.data.address}, ${messResult.data.city}"
+            } else {
+                tvMess.text = "Mess details not found"
+            }
+        }
+
         AlertDialog.Builder(requireContext())
-            .setTitle(user.name)
-            .setMessage(
-                "Email: ${user.email}\n" +
-                    "Phone: ${user.phone}\n" +
-                    "Status: ${user.status}",
-            )
+            .setView(dialogView)
             .setPositiveButton("Approve") { _, _ -> viewModel.approveOwner(user.uid) }
             .setNeutralButton("Reject") { _, _ -> viewModel.rejectOwner(user.uid) }
             .setNegativeButton("Close", null)
@@ -170,4 +193,3 @@ class AdminHomeFragment : Fragment() {
         _binding = null
     }
 }
-

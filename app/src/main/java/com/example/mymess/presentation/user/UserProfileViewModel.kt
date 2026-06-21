@@ -1,7 +1,9 @@
 package com.example.mymess.presentation.user
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mymess.core.ImageUploader
 import com.example.mymess.core.Resource
 import com.example.mymess.core.SessionManager
 import com.example.mymess.data.models.User
@@ -16,6 +18,7 @@ import kotlinx.coroutines.launch
 class UserProfileViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val sessionManager: SessionManager,
+    private val imageUploader: ImageUploader,
 ) : ViewModel() {
 
     private val _profileState = MutableStateFlow<Resource<User>>(Resource.Loading)
@@ -43,7 +46,7 @@ class UserProfileViewModel @Inject constructor(
         }
     }
 
-    fun updateProfile(name: String, phone: String) {
+    fun updateProfile(name: String, phone: String, profilePicUri: Uri?, existingProfilePic: String?) {
         val uid = sessionManager.getUid()
         if (uid.isNullOrBlank()) {
             _profileUpdateState.value = Resource.Error("Invalid session. Please login again")
@@ -52,7 +55,21 @@ class UserProfileViewModel @Inject constructor(
 
         viewModelScope.launch {
             _profileUpdateState.value = Resource.Loading
-            val result = authRepository.updateUserProfile(uid, name, phone)
+            
+            val profilePicUrl = if (profilePicUri != null) {
+                when (val result = imageUploader.uploadImage(profilePicUri)) {
+                    is Resource.Success -> result.data
+                    is Resource.Error -> {
+                        _profileUpdateState.value = Resource.Error("Image upload failed: ${result.message}")
+                        return@launch
+                    }
+                    Resource.Loading -> null
+                }
+            } else {
+                existingProfilePic
+            }
+
+            val result = authRepository.updateUserProfile(uid, name, phone, profilePicUrl)
             _profileUpdateState.value = result
             if (result is Resource.Success) {
                 _profileState.value = Resource.Success(result.data)
@@ -90,4 +107,3 @@ class UserProfileViewModel @Inject constructor(
         _passwordState.value = null
     }
 }
-

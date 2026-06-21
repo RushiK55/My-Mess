@@ -9,8 +9,7 @@ import com.example.mymess.data.models.Order
 import com.example.mymess.databinding.ItemOwnerRequestBinding
 
 class OwnerOrderRequestsAdapter(
-    private val onAccept: (Order) -> Unit,
-    private val onReject: (Order) -> Unit,
+    private val onItemClick: (Order) -> Unit,
 ) : ListAdapter<Order, OwnerOrderRequestsAdapter.RequestViewHolder>(OrderDiff) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RequestViewHolder {
@@ -25,9 +24,8 @@ class OwnerOrderRequestsAdapter(
     inner class RequestViewHolder(private val binding: ItemOwnerRequestBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: Order) {
             binding.tvMeal.text = item.mealName
-            binding.tvMeta.text = "Qty ${item.quantity} | Rs ${item.totalPrice}"
-            binding.btnAccept.setOnClickListener { onAccept(item) }
-            binding.btnReject.setOnClickListener { onReject(item) }
+            binding.tvMeta.text = "Qty ${item.quantity} | Total Rs ${item.totalPrice}"
+            binding.root.setOnClickListener { onItemClick(item) }
         }
     }
 
@@ -37,4 +35,3 @@ class OwnerOrderRequestsAdapter(
         override fun areContentsTheSame(oldItem: Order, newItem: Order): Boolean = oldItem == newItem
     }
 }
-

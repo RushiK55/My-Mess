@@ -9,7 +9,7 @@ import com.example.mymess.data.models.Order
 import com.example.mymess.databinding.ItemOwnerOrderBinding
 
 class OwnerPendingOrdersAdapter(
-    private val onAdvance: (Order) -> Unit,
+    private val onItemClick: (Order) -> Unit,
 ) : ListAdapter<Order, OwnerPendingOrdersAdapter.OrderViewHolder>(OrderDiff) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OrderViewHolder {
@@ -24,17 +24,10 @@ class OwnerPendingOrdersAdapter(
     inner class OrderViewHolder(private val binding: ItemOwnerOrderBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: Order) {
             binding.tvMeal.text = item.mealName
-            binding.tvMeta.text = "Qty ${item.quantity} | Rs ${item.totalPrice}"
-            binding.tvStatus.text = "Current: ${item.status}"
-            binding.btnAdvance.text = when (item.status) {
-                "pending" -> "Accept"
-                "accepted" -> "Start Preparing"
-                "preparing" -> "Mark Ready"
-                "ready" -> "Deliver"
-                else -> "Done"
-            }
-            binding.btnAdvance.isEnabled = item.status != "delivered"
-            binding.btnAdvance.setOnClickListener { onAdvance(item) }
+            binding.tvMeta.text = "Qty ${item.quantity} | Total Rs ${item.totalPrice}"
+            binding.tvStatus.text = "Status: ${item.status.replaceFirstChar { it.uppercase() }}"
+         //   binding.btnAdvance.visibility = android.view.View.GONE // Hide from list item
+            binding.root.setOnClickListener { onItemClick(item) }
         }
     }
 
@@ -44,4 +37,3 @@ class OwnerPendingOrdersAdapter(
         override fun areContentsTheSame(oldItem: Order, newItem: Order): Boolean = oldItem == newItem
     }
 }
-

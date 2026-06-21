@@ -10,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.mymess.MainActivity
 import com.example.mymess.core.Resource
 import com.example.mymess.data.models.OwnerAnalyticsInsights
 import com.example.mymess.databinding.FragmentOwnerAnalyticsBinding
@@ -49,22 +50,23 @@ class OwnerAnalyticsFragment : Fragment() {
     }
 
     private fun observe() {
+        val mainActivity = activity as? MainActivity
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.state.collect { state ->
                     when (state) {
                         is Resource.Error -> {
-                            binding.progressBar.visibility = View.GONE
+                            mainActivity?.hideLoader()
                             binding.tvInfo.text = state.message
                         }
 
                         Resource.Loading -> {
-                            binding.progressBar.visibility = View.VISIBLE
+                            mainActivity?.showLoader("Generating analytics...")
                             binding.tvInfo.text = "Loading analytics..."
                         }
 
                         is Resource.Success -> {
-                            binding.progressBar.visibility = View.GONE
+                            mainActivity?.hideLoader()
                             bindCharts(state.data)
                         }
                     }

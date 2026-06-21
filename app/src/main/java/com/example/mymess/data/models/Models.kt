@@ -15,6 +15,7 @@ data class User(
     val approvedAt: Long? = null,
     val blockedByMessId: String? = null,
     val blockReason: String? = null,
+    val profilePic: String? = null,
 )
 
 data class Mess(
@@ -175,4 +176,3 @@ fun PaymentRecord.category(): String {
     if (paymentType.equals("mess_bill", ignoreCase = true)) return "mess_bill"
     return if (!orderId.isNullOrBlank()) "cloud_advance" else "mess_bill"
 }
-

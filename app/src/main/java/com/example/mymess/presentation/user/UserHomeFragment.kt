@@ -1,6 +1,8 @@
 package com.example.mymess.presentation.user
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +16,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.viewpager2.widget.ViewPager2
+import coil.load
+import com.example.mymess.MainActivity
 import com.example.mymess.R
 import com.example.mymess.core.Resource
 import com.example.mymess.data.models.Meal
@@ -23,7 +28,7 @@ import com.example.mymess.databinding.BottomSheetMealDetailsBinding
 import com.example.mymess.databinding.FragmentUserHomeBinding
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayout
-import coil.load
+import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -41,12 +46,21 @@ class UserHomeFragment : Fragment() {
             if (mess == null) "" else "From ${mess.name}, ${mess.city}"
         },
     )
-    private val messMealAdapter = MealAdapter(onMealClick = { meal -> showMealDetailsBottomSheet(meal) })
+    private val messMealAdapter =
+        MealAdapter(onMealClick = { meal -> showMealDetailsBottomSheet(meal) })
     private val bannerAdapter = BannerPagerAdapter()
 
     private var allCloudMeals: List<Meal> = emptyList()
     private var allMesses: List<Mess> = emptyList()
     private var messMeals: List<Meal> = emptyList()
+
+    private val sliderHandler = Handler(Looper.getMainLooper())
+    private val sliderRunnable = Runnable {
+        if (_binding != null) {
+            val nextItem = (binding.vpBanners.currentItem + 1) % bannerAdapter.itemCount
+            binding.vpBanners.currentItem = nextItem
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -61,6 +75,16 @@ class UserHomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.vpBanners.adapter = bannerAdapter
+        TabLayoutMediator(binding.tabIndicator, binding.vpBanners) { _, _ -> }.attach()
+
+        binding.vpBanners.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                sliderHandler.removeCallbacks(sliderRunnable)
+                sliderHandler.postDelayed(sliderRunnable, 3000)
+            }
+        })
+
         binding.rvMeals.layoutManager = LinearLayoutManager(requireContext())
         binding.rvMeals.adapter = cloudAdapter
         binding.rvMeals.isNestedScrollingEnabled = false
@@ -82,6 +106,8 @@ class UserHomeFragment : Fragment() {
             override fun onTabReselected(tab: TabLayout.Tab) = Unit
         })
 
+
+
         binding.btnRefreshCloud.setOnClickListener { viewModel.loadCloudMeals() }
         binding.bottomNavUser.selectedItemId = R.id.nav_user_home
         binding.bottomNavUser.setOnItemSelectedListener { item ->
@@ -91,19 +117,22 @@ class UserHomeFragment : Fragment() {
                     findNavController().navigate(R.id.action_userHomeFragment_to_userOrdersFragment)
                     true
                 }
+
                 R.id.nav_user_messes -> {
                     findNavController().navigate(R.id.action_userHomeFragment_to_userMessesFragment)
                     true
                 }
+
                 R.id.nav_user_profile -> {
                     findNavController().navigate(R.id.action_userHomeFragment_to_userProfileFragment)
                     true
                 }
+
                 else -> false
             }
         }
 
-        binding.etSearchMeals.addTextChangedListener { applyCloudSearch() }
+        binding.etSearchMeals.addTextChangedListener { applySearch() }
 
         observeUi()
         viewModel.loadApprovedMesses()
@@ -125,58 +154,108 @@ class UserHomeFragment : Fragment() {
         val mess = allMesses.firstOrNull { it.messId == meal.messId }
         val messInfo = if (mess == null) "" else "From ${mess.name}, ${mess.city}"
 
-        sheetBinding.ivMeal.load(meal.imageUrl)
+        sheetBinding.ivMeal.load(meal.imageUrl) {
+            placeholder(android.R.color.darker_gray)
+            error(android.R.color.darker_gray)
+        }
         sheetBinding.tvMealName.text = meal.name
-        sheetBinding.tvMealMeta.text = "Rs ${meal.price}" + if (messInfo.isBlank()) "" else " | $messInfo"
-        sheetBinding.tvMealDescription.text = meal.description.ifBlank { "No description available" }
+        sheetBinding.tvMealMeta.text =
+            "Rs ${meal.price}" + if (messInfo.isBlank()) "" else " | $messInfo"
+        sheetBinding.tvMealDescription.text =
+            meal.description.ifBlank { "No description available" }
+
+        var quantity = 1
+
+        fun updatePrice() {
+            sheetBinding.tvQuantity.text = quantity.toString()
+            val total = meal.price * quantity
+            sheetBinding.tvOrderTotal.text = "Rs $total"
+        }
+
+        updatePrice()
+
+        sheetBinding.btnPlus.setOnClickListener {
+            quantity++
+            updatePrice()
+        }
+
+        sheetBinding.btnMinus.setOnClickListener {
+            if (quantity > 1) {
+                quantity--
+                updatePrice()
+            }
+        }
 
         sheetBinding.btnPlaceOrder.setOnClickListener {
-            val qty = sheetBinding.etQuantity.text?.toString()?.toIntOrNull()?.coerceAtLeast(1) ?: 1
-            val instructions = sheetBinding.etInstructions.text?.toString()?.trim().orEmpty().ifBlank { null }
-            viewModel.orderMeal(meal, qty, instructions)
+            val instructions =
+                sheetBinding.etInstructions.text?.toString()?.trim().orEmpty().ifBlank { null }
+            viewModel.orderMeal(meal, quantity, instructions)
             dialog.dismiss()
         }
 
         dialog.show()
     }
 
-    private fun applyCloudSearch() {
+    private fun applySearch() {
         val query = binding.etSearchMeals.text?.toString().orEmpty().trim().lowercase()
+
         if (query.isBlank()) {
             cloudAdapter.submitList(allCloudMeals)
-            return
+        } else {
+            val filteredCloud = allCloudMeals.filter { meal ->
+                val mess = allMesses.firstOrNull { it.messId == meal.messId }
+                meal.name.lowercase().contains(query) ||
+                        meal.description.lowercase().contains(query) ||
+                        mess?.name?.lowercase()?.contains(query) == true ||
+                        mess?.city?.lowercase()?.contains(query) == true
+            }
+            cloudAdapter.submitList(filteredCloud)
         }
-        val filtered = allCloudMeals.filter { meal ->
-            val mess = allMesses.firstOrNull { it.messId == meal.messId }
-            meal.name.lowercase().contains(query) ||
-                meal.description.lowercase().contains(query) ||
-                mess?.name?.lowercase()?.contains(query) == true ||
-                mess?.city?.lowercase()?.contains(query) == true
+
+        if (query.isBlank()) {
+            messMealAdapter.submitList(messMeals)
+            binding.tvMessMealsEmpty.visibility =
+                if (messMeals.isEmpty()) View.VISIBLE else View.GONE
+            if (messMeals.isEmpty()) {
+                binding.tvMessMealsEmpty.text = "No menu available for your mess"
+            }
+        } else {
+            val filteredMess = messMeals.filter { meal ->
+                meal.name.lowercase().contains(query) ||
+                        meal.description.lowercase().contains(query)
+            }
+            messMealAdapter.submitList(filteredMess)
+            binding.tvMessMealsEmpty.visibility =
+                if (filteredMess.isEmpty()) View.VISIBLE else View.GONE
+            if (filteredMess.isEmpty() && messMeals.isNotEmpty()) {
+                binding.tvMessMealsEmpty.text = "No mess meals match your search"
+            }
         }
-        cloudAdapter.submitList(filtered)
     }
 
     private fun observeUi() {
+        val mainActivity = activity as? MainActivity
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.cloudMealsState.collect { state ->
                         when (state) {
                             is Resource.Error -> {
-                                binding.progressBar.visibility = View.GONE
+                                mainActivity?.hideLoader()
                                 binding.tvInfo.text = state.message
                             }
 
                             Resource.Loading -> {
-                                binding.progressBar.visibility = View.VISIBLE
+                                mainActivity?.showLoader("Fetching latest meals...")
                                 binding.tvInfo.text = "Loading cloud meals..."
                             }
 
                             is Resource.Success -> {
-                                binding.progressBar.visibility = View.GONE
+                                mainActivity?.hideLoader()
                                 allCloudMeals = state.data
-                                applyCloudSearch()
-                                binding.tvInfo.text = if (state.data.isEmpty()) "No cloud meals available" else "Cloud meals: ${state.data.size}"
+                                applySearch()
+                                binding.tvInfo.text =
+                                    if (state.data.isEmpty()) "No cloud meals available" else "Cloud meals: ${state.data.size}"
                             }
                         }
                     }
@@ -195,8 +274,12 @@ class UserHomeFragment : Fragment() {
                         when (state) {
                             is Resource.Success -> {
                                 bannerAdapter.submitList(state.data)
-                                binding.tvBannerEmpty.text = if (state.data.isEmpty()) "No active banners" else ""
+                                binding.tvBannerEmpty.text =
+                                    if (state.data.isEmpty()) "No active banners" else ""
+                                binding.tabIndicator.visibility =
+                                    if (state.data.size > 1) View.VISIBLE else View.GONE
                             }
+
                             is Resource.Error -> binding.tvBannerEmpty.text = state.message
                             Resource.Loading -> Unit
                         }
@@ -210,12 +293,14 @@ class UserHomeFragment : Fragment() {
                                 binding.tvMessTitle.text = "Mess Section"
                                 binding.tvMessDetails.text = state.message
                             }
+
                             Resource.Loading -> Unit
                             is Resource.Success -> {
                                 val mess = state.data
                                 if (mess == null) {
                                     binding.tvMessTitle.text = "Not enrolled in any mess"
-                                    binding.tvMessDetails.text = "Browse messes and send a join request"
+                                    binding.tvMessDetails.text =
+                                        "Browse messes and send a join request"
                                     binding.rvMessMeals.visibility = View.GONE
                                     binding.tvMessMealsEmpty.visibility = View.VISIBLE
                                     binding.tvMessMealsEmpty.text = "Join a mess to view menu"
@@ -223,7 +308,8 @@ class UserHomeFragment : Fragment() {
                                     binding.tvMessTitle.text = mess.name
                                     binding.tvMessDetails.text = "${mess.address}, ${mess.city}"
                                     binding.rvMessMeals.visibility = View.VISIBLE
-                                    binding.tvMessMealsEmpty.text = "No menu available for your mess"
+                                    binding.tvMessMealsEmpty.text =
+                                        "No menu available for your mess"
                                 }
                             }
                         }
@@ -235,10 +321,15 @@ class UserHomeFragment : Fragment() {
                         when (state) {
                             is Resource.Success -> {
                                 messMeals = state.data
-                                messMealAdapter.submitList(state.data)
-                                binding.tvMessMealsEmpty.visibility = if (state.data.isEmpty()) View.VISIBLE else View.GONE
+                                applySearch()
                             }
-                            is Resource.Error -> Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+
+                            is Resource.Error -> Toast.makeText(
+                                requireContext(),
+                                state.message,
+                                Toast.LENGTH_SHORT
+                            ).show()
+
                             Resource.Loading -> Unit
                         }
                     }
@@ -249,7 +340,8 @@ class UserHomeFragment : Fragment() {
                     viewModel.paymentsState.collect { state ->
                         if (state is Resource.Success) {
                             val messBills = state.data.filter { it.category() == "mess_bill" }
-                            val pendingCount = messBills.count { it.status == "pending" || it.status == "payment_submitted" }
+                            val pendingCount =
+                                messBills.count { it.status == "pending" || it.status == "payment_submitted" }
                             val pendingAmount = messBills
                                 .filter { it.status == "pending" || it.status == "payment_submitted" }
                                 .sumOf { it.amount }
@@ -263,9 +355,22 @@ class UserHomeFragment : Fragment() {
                 launch {
                     viewModel.orderState.collect { state ->
                         when (state) {
-                            is Resource.Error -> Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
-                            Resource.Loading -> Unit
-                            is Resource.Success -> Toast.makeText(requireContext(), "Order placed: ${state.data}", Toast.LENGTH_SHORT).show()
+                            is Resource.Error -> {
+                                mainActivity?.hideLoader()
+                                Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+
+                            Resource.Loading -> mainActivity?.showLoader("Placing your order...")
+                            is Resource.Success -> {
+                                mainActivity?.hideLoader()
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Order placed: ${state.data}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+
                             null -> Unit
                         }
                     }
@@ -274,9 +379,20 @@ class UserHomeFragment : Fragment() {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        sliderHandler.removeCallbacks(sliderRunnable)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (bannerAdapter.itemCount > 0) {
+            sliderHandler.postDelayed(sliderRunnable, 3000)
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 }
-

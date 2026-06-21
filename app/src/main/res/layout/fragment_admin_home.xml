@@ -1,409 +1,348 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/admin_bg"
-    android:clipToPadding="false"
-    android:fillViewport="true">
+    android:background="@color/brand_background">
 
-    <LinearLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:background="@android:color/transparent"
+        app:elevation="0dp">
 
-        <com.google.android.material.card.MaterialCardView
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/admin_surface"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="3dp"
-            app:strokeColor="@color/admin_divider"
-            app:strokeWidth="1dp">
+            android:background="@drawable/bg_admin_header"
+            android:padding="24dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="18dp">
+                android:layout_marginTop="16dp"
+                android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Admin Dashboard"
-                    android:textColor="@color/admin_primary"
+                    android:text="Admin Control"
                     android:textAppearance="@style/TextAppearance.MyMess.Admin.Heading"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="Monitor users, banners, and request queues from one place"
-                    android:textAppearance="@style/TextAppearance.MyMess.Admin.Body"
-                    android:textColor="@color/admin_text_secondary" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            app:cardBackgroundColor="@color/admin_surface"
-            app:cardCornerRadius="18dp"
-            app:cardElevation="2dp"
-            app:strokeColor="@color/admin_divider"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                    android:textColor="@color/white" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Overview"
-                    android:textAppearance="@style/TextAppearance.MyMess.Admin.Title"
-                    android:textStyle="bold" />
+                    android:layout_marginTop="4dp"
+                    android:alpha="0.8"
+                    android:text="Overview &amp; Management Dashboard"
+                    android:textAppearance="@style/TextAppearance.MyMess.Admin.Body"
+                    android:textColor="@color/white" />
 
-                <LinearLayout
+                <!-- Summary Section -->
+                <com.google.android.material.card.MaterialCardView
+                    style="@style/AdminCard"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:orientation="horizontal">
+                    android:layout_gravity="bottom"
+                    app:cardElevation="4dp">
 
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="0dp"
+                    <GridLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="6dp"
-                        android:layout_weight="1"
-                        app:cardBackgroundColor="@color/admin_bg"
-                        app:cardCornerRadius="14dp"
-                        app:cardElevation="0dp"
-                        app:strokeColor="@color/admin_divider"
-                        app:strokeWidth="1dp">
+                        android:columnCount="2"
+                        android:padding="16dp"
+                        android:rowCount="2">
 
+                        <!-- Users -->
                         <LinearLayout
-                            android:layout_width="match_parent"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:padding="14dp">
+                            android:layout_columnWeight="1"
+                            android:layout_marginBottom="16dp"
+                            android:orientation="vertical">
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Total Users"
-                                android:textAppearance="@style/TextAppearance.MyMess.Admin.Body"
-                                android:textColor="@color/admin_text_secondary" />
+                                android:textAppearance="@style/TextAppearance.MyMess.Admin.Label" />
 
                             <TextView
                                 android:id="@+id/tvSummaryUsers"
-                                android:layout_width="match_parent"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="6dp"
-                                android:text="Loading..."
-                                android:textAppearance="@style/TextAppearance.MyMess.Admin.Data"
-                                android:textColor="@color/admin_primary"
-                                android:textStyle="bold" />
+                                android:layout_marginTop="4dp"
+                                android:text="--"
+                                android:textAppearance="@style/TextAppearance.MyMess.Admin.Data" />
                         </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
 
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:layout_weight="1"
-                        app:cardBackgroundColor="@color/admin_bg"
-                        app:cardCornerRadius="14dp"
-                        app:cardElevation="0dp"
-                        app:strokeColor="@color/admin_divider"
-                        app:strokeWidth="1dp">
-
+                        <!-- Owners -->
                         <LinearLayout
-                            android:layout_width="match_parent"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:padding="14dp">
+                            android:layout_columnWeight="1"
+                            android:layout_marginBottom="16dp"
+                            android:orientation="vertical">
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Total Owners"
-                                android:textAppearance="@style/TextAppearance.MyMess.Admin.Body"
-                                android:textColor="@color/admin_text_secondary" />
+                                android:textAppearance="@style/TextAppearance.MyMess.Admin.Label" />
 
                             <TextView
                                 android:id="@+id/tvSummaryOwners"
-                                android:layout_width="match_parent"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="6dp"
-                                android:text="Loading..."
-                                android:textAppearance="@style/TextAppearance.MyMess.Admin.Data"
-                                android:textColor="@color/admin_primary"
-                                android:textStyle="bold" />
+                                android:layout_marginTop="4dp"
+                                android:text="--"
+                                android:textAppearance="@style/TextAppearance.MyMess.Admin.Data" />
                         </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
-                </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal">
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="6dp"
-                        android:layout_weight="1"
-                        app:cardBackgroundColor="@color/admin_bg"
-                        app:cardCornerRadius="14dp"
-                        app:cardElevation="0dp"
-                        app:strokeColor="@color/admin_divider"
-                        app:strokeWidth="1dp">
-
+                        <!-- Orders -->
                         <LinearLayout
-                            android:layout_width="match_parent"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:padding="14dp">
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical">
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Total Orders"
-                                android:textAppearance="@style/TextAppearance.MyMess.Admin.Body"
-                                android:textColor="@color/admin_text_secondary" />
+                                android:textAppearance="@style/TextAppearance.MyMess.Admin.Label" />
 
                             <TextView
                                 android:id="@+id/tvSummaryOrders"
-                                android:layout_width="match_parent"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="6dp"
-                                android:text="Loading..."
-                                android:textAppearance="@style/TextAppearance.MyMess.Admin.Data"
-                                android:textColor="@color/admin_primary"
-                                android:textStyle="bold" />
+                                android:layout_marginTop="4dp"
+                                android:text="--"
+                                android:textAppearance="@style/TextAppearance.MyMess.Admin.Data" />
                         </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
 
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:layout_weight="1"
-                        app:cardBackgroundColor="@color/admin_bg"
-                        app:cardCornerRadius="14dp"
-                        app:cardElevation="0dp"
-                        app:strokeColor="@color/admin_divider"
-                        app:strokeWidth="1dp">
-
+                        <!-- Revenue -->
                         <LinearLayout
-                            android:layout_width="match_parent"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:padding="14dp">
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical">
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Total Revenue"
-                                android:textAppearance="@style/TextAppearance.MyMess.Admin.Body"
-                                android:textColor="@color/admin_text_secondary" />
+                                android:textAppearance="@style/TextAppearance.MyMess.Admin.Label" />
 
                             <TextView
                                 android:id="@+id/tvSummaryRevenue"
-                                android:layout_width="match_parent"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="6dp"
-                                android:text="Loading..."
+                                android:layout_marginTop="4dp"
+                                android:text="--"
                                 android:textAppearance="@style/TextAppearance.MyMess.Admin.Data"
-                                android:textColor="@color/admin_primary"
-                                android:textStyle="bold" />
+                                android:textColor="@color/admin_success" />
                         </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
-                </LinearLayout>
+                    </GridLayout>
+                </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
 
-        <com.google.android.material.card.MaterialCardView
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRefresh"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|top"
+                app:icon="@android:drawable/stat_notify_sync"
+                app:iconTint="@color/white" />
+
+        </FrameLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="24dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            app:cardBackgroundColor="@color/admin_surface"
-            app:cardCornerRadius="18dp"
-            app:cardElevation="2dp"
-            app:strokeColor="@color/admin_divider"
-            app:strokeWidth="1dp">
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp">
+
+
+            <!-- Quick Actions -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="12dp"
+                android:text="Quick Actions"
+                android:textAppearance="@style/TextAppearance.MyMess.Admin.Title" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:orientation="horizontal">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/btnUsers"
+                    style="@style/AdminCard"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Quick Actions"
-                    android:textAppearance="@style/TextAppearance.MyMess.Admin.Title"
-                    android:textStyle="bold" />
+                    android:layout_weight="1"
+                    app:cardUseCompatPadding="true"
+                    android:clickable="true"
+                    android:focusable="true">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@android:drawable/ic_menu_myplaces"
+                            app:tint="@color/brand_primary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Users"
+                            android:textAppearance="@style/TextAppearance.MyMess.Admin.Label" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/btnBanners"
+                    style="@style/AdminCard"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:orientation="horizontal">
+                    android:layout_marginHorizontal="4dp"
+                    android:layout_weight="1"
+                    app:cardUseCompatPadding="true"
+                    android:clickable="true"
+                    android:focusable="true">
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnUsers"
-                        android:layout_width="0dp"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="6dp"
-                        android:layout_weight="1"
-                        android:minHeight="72dp"
-                        android:text="Users"
-                        android:textAllCaps="false"
-                        android:textColor="@color/admin_on_accent"
-                        app:backgroundTint="@color/admin_accent"
-                        app:icon="@android:drawable/ic_menu_manage"
-                        app:iconGravity="textTop"
-                        app:iconPadding="8dp" />
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="16dp">
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnBanners"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="6dp"
-                        android:layout_weight="1"
-                        android:minHeight="72dp"
-                        android:text="Banners"
-                        android:textAllCaps="false"
-                        android:textColor="@color/admin_on_accent"
-                        app:backgroundTint="@color/admin_accent"
-                        app:icon="@android:drawable/ic_menu_gallery"
-                        app:iconGravity="textTop"
-                        app:iconPadding="8dp" />
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@android:drawable/ic_menu_gallery"
+                            app:tint="@color/brand_primary" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnAnalytics"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:layout_weight="1"
-                        android:minHeight="72dp"
-                        android:text="Analytics"
-                        android:textAllCaps="false"
-                        android:textColor="@color/admin_on_accent"
-                        app:backgroundTint="@color/admin_accent"
-                        app:icon="@android:drawable/ic_menu_info_details"
-                        app:iconGravity="textTop"
-                        app:iconPadding="8dp" />
-                </LinearLayout>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Banners"
+                            android:textAppearance="@style/TextAppearance.MyMess.Admin.Label" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/btnAnalytics"
+                    style="@style/AdminCard"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:layout_weight="1"
+                    app:cardUseCompatPadding="true"
+                    android:clickable="true"
+                    android:focusable="true">
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnRefresh"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:minHeight="48dp"
-                        android:text="Refresh"
-                        android:textAllCaps="false"
-                        android:textColor="@color/admin_primary"
-                        app:icon="@android:drawable/ic_menu_rotate"
-                        app:strokeColor="@color/admin_primary" />
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="16dp">
 
-                    <ProgressBar
-                        android:id="@+id/progressBar"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:visibility="gone" />
-                </LinearLayout>
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@android:drawable/ic_menu_compass"
+                            app:tint="@color/brand_primary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Insights"
+                            android:textAppearance="@style/TextAppearance.MyMess.Admin.Label" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            app:cardBackgroundColor="@color/admin_surface"
-            app:cardCornerRadius="18dp"
-            app:cardElevation="2dp"
-            app:strokeColor="@color/admin_divider"
-            app:strokeWidth="1dp">
-
+            <!-- Pending Approvals -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:layout_marginTop="24dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/tvAdminInfo"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Pending Owner Approvals"
-                    android:textAppearance="@style/TextAppearance.MyMess.Admin.Title"
-                    android:textStyle="bold" />
+                    android:layout_weight="1"
+                    android:text="Pending Approvals"
+                    android:textAppearance="@style/TextAppearance.MyMess.Admin.Title" />
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvPendingOwners"
-                    android:layout_width="match_parent"
-                    android:layout_height="220dp"
-                    android:layout_marginTop="12dp"
-                    android:clipToPadding="false"
-                    android:nestedScrollingEnabled="false"
-                    android:paddingBottom="4dp"
-                    android:background="@color/admin_surface" />
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    style="?android:attr/progressBarStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone" />
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            android:layout_marginBottom="8dp"
-            app:cardBackgroundColor="@color/admin_surface"
-            app:cardCornerRadius="18dp"
-            app:cardElevation="2dp"
-            app:strokeColor="@color/admin_divider"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvPendingOwners"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:layout_marginTop="12dp"
+                android:minHeight="100dp"
+                android:nestedScrollingEnabled="false"
+                tools:itemCount="2"
+                tools:listitem="@layout/item_pending_owner" />
 
-                <TextView
-                    android:id="@+id/tvBannerInfo"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Featured Banners"
-                    android:textAppearance="@style/TextAppearance.MyMess.Admin.Title"
-                    android:textStyle="bold" />
+            <!-- Featured Banners -->
+            <TextView
+                android:id="@+id/tvBannerInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Featured Banners"
+                android:visibility="gone"
+                android:textAppearance="@style/TextAppearance.MyMess.Admin.Title" />
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvBanners"
-                    android:layout_width="match_parent"
-                    android:layout_height="150dp"
-                    android:layout_marginTop="12dp"
-                    android:clipToPadding="false"
-                    android:nestedScrollingEnabled="false"
-                    android:background="@color/admin_surface" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvBanners"
+                android:layout_width="match_parent"
+                android:layout_height="140dp"
+                android:layout_marginTop="12dp"
+                android:clipToPadding="false"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_admin_banner_manage" />
 
-    </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

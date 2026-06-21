@@ -12,9 +12,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.mymess.MainActivity
 import com.example.mymess.R
 import com.example.mymess.core.Resource
+import com.example.mymess.data.models.Order
+import com.example.mymess.databinding.BottomSheetOrderStatusDetailsBinding
 import com.example.mymess.databinding.FragmentOwnerPendingOrdersBinding
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -24,7 +28,9 @@ class OwnerPendingOrdersFragment : Fragment() {
     private var _binding: FragmentOwnerPendingOrdersBinding? = null
     private val binding get() = _binding!!
     private val viewModel: OwnerPendingOrdersViewModel by viewModels()
-    private val adapter = OwnerPendingOrdersAdapter { viewModel.advance(it) }
+    private val adapter = OwnerPendingOrdersAdapter { showOrderDetails(it) }
+    
+    private var allOrders: List<Order> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,8 +46,61 @@ class OwnerPendingOrdersFragment : Fragment() {
         binding.rvOrders.layoutManager = LinearLayoutManager(requireContext())
         binding.rvOrders.adapter = adapter
         setupBottomNav()
+        setupFilters()
         observe()
         viewModel.load()
+    }
+
+    private fun setupFilters() {
+        binding.chipGroupStatus.setOnCheckedStateChangeListener { _, checkedIds ->
+            applyFilters()
+        }
+    }
+
+    private fun applyFilters() {
+        val selectedStatus = when (binding.chipGroupStatus.checkedChipId) {
+            R.id.chipAccepted -> "accepted"
+            R.id.chipPreparing -> "preparing"
+            R.id.chipReady -> "ready"
+            R.id.chipDelivered -> "delivered"
+            else -> "all"
+        }
+
+        val filtered = if (selectedStatus == "all") {
+            allOrders
+        } else {
+            allOrders.filter { it.status == selectedStatus }
+        }
+        adapter.submitList(filtered)
+        binding.tvInfo.text = "Showing ${filtered.size} orders"
+    }
+
+    private fun showOrderDetails(order: Order) {
+        val sheetBinding = BottomSheetOrderStatusDetailsBinding.inflate(layoutInflater)
+        val dialog = BottomSheetDialog(requireContext())
+        dialog.setContentView(sheetBinding.root)
+
+        sheetBinding.tvSheetMealName.text = order.mealName
+        sheetBinding.tvSheetOrderMeta.text = "Qty: ${order.quantity} | Total: Rs ${order.totalPrice}"
+        sheetBinding.tvSheetStatus.text = "Current Status: ${order.status.replaceFirstChar { it.uppercase() }}"
+        sheetBinding.tvSheetInstructions.text = order.specialInstructions?.takeIf { it.isNotBlank() } ?: "No special instructions"
+
+        sheetBinding.btnSheetAction.text = when (order.status) {
+            "accepted" -> "Start Preparing"
+            "preparing" -> "Mark as Ready"
+            "ready" -> "Deliver Order"
+            else -> "Order Delivered"
+        }
+        sheetBinding.btnSheetAction.isEnabled = order.status != "delivered"
+
+        sheetBinding.btnSheetAction.setOnClickListener {
+            viewModel.advance(order)
+            dialog.dismiss()
+        }
+
+        sheetBinding.btnClose.setOnClickListener { dialog.dismiss() }
+
+        dialog.show()
     }
 
     private fun setupBottomNav() {
@@ -67,23 +126,24 @@ class OwnerPendingOrdersFragment : Fragment() {
     }
 
     private fun observe() {
+        val mainActivity = activity as? MainActivity
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.ordersState.collect { state ->
                         when (state) {
                             is Resource.Error -> {
-                                binding.progressBar.visibility = View.GONE
+                                mainActivity?.hideLoader()
                                 binding.tvInfo.text = state.message
                             }
                             Resource.Loading -> {
-                                binding.progressBar.visibility = View.VISIBLE
+                                mainActivity?.showLoader("Loading orders...")
                                 binding.tvInfo.text = "Loading pending orders..."
                             }
                             is Resource.Success -> {
-                                binding.progressBar.visibility = View.GONE
-                                adapter.submitList(state.data)
-                                binding.tvInfo.text = "Orders in progress: ${state.data.size}"
+                                mainActivity?.hideLoader()
+                                allOrders = state.data
+                                applyFilters()
                             }
                         }
                     }
@@ -91,9 +151,15 @@ class OwnerPendingOrdersFragment : Fragment() {
                 launch {
                     viewModel.actionState.collect { state ->
                         when (state) {
-                            is Resource.Error -> Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
-                            Resource.Loading -> Unit
-                            is Resource.Success -> Toast.makeText(requireContext(), "Order status updated", Toast.LENGTH_SHORT).show()
+                            is Resource.Error -> {
+                                mainActivity?.hideLoader()
+                                Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                            }
+                            Resource.Loading -> mainActivity?.showLoader("Updating status...")
+                            is Resource.Success -> {
+                                mainActivity?.hideLoader()
+                                Toast.makeText(requireContext(), "Order status updated", Toast.LENGTH_SHORT).show()
+                            }
                             null -> Unit
                         }
                     }

@@ -284,8 +284,18 @@ class OwnerRepositoryImpl @Inject constructor(
     override suspend fun updateOwnerMess(ownerUid: String, mess: Mess): Resource<Unit> {
         return runCatching {
             val existing = getOwnerMessInternal(ownerUid) ?: return Resource.Error("Mess not found")
-            val payload = mess.copy(messId = existing.messId, ownerId = ownerUid, createdAt = existing.createdAt)
-            val response = api.putData("messes", existing.messId, payload)
+            val updates = mutableMapOf<String, Any?>(
+                "name" to mess.name.trim(),
+                "address" to mess.address.trim(),
+                "city" to mess.city.trim(),
+                "contact" to mess.contact.trim(),
+                "description" to mess.description.trim()
+            )
+            if (mess.imageUrl != null) {
+                updates["imageUrl"] = mess.imageUrl
+            }
+            
+            val response = api.patchData("messes", existing.messId, updates)
             if (response.isSuccessful) Resource.Success(Unit) else Resource.Error("Failed to update mess")
         }.getOrElse { Resource.Error(it.message ?: "Failed to update mess") }
     }

@@ -110,6 +110,20 @@ class AdminRepositoryImpl @Inject constructor(
         }.getOrElse { Resource.Error(it.message ?: "Failed to delete user") }
     }
 
+    override suspend fun getMessByOwnerId(ownerUid: String): Resource<Mess> {
+        return runCatching {
+            val response = api.getData("messes")
+            if (!response.isSuccessful || response.body() == null) {
+                return Resource.Error("No messes found")
+            }
+            val type = object : TypeToken<Map<String, Mess>>() {}.type
+            val messes: Map<String, Mess> = gson.fromJson(response.body(), type) ?: emptyMap()
+            val mess = messes.values.firstOrNull { it.ownerId == ownerUid }
+                ?: return Resource.Error("Mess profile not found for this owner")
+            Resource.Success(mess)
+        }.getOrElse { Resource.Error(it.message ?: "Failed to fetch mess details") }
+    }
+
     private suspend fun updateOwnerStatus(ownerUid: String, status: String): Resource<Unit> {
         return runCatching {
             val userResponse = api.getObject("users", ownerUid)
@@ -133,9 +147,7 @@ class AdminRepositoryImpl @Inject constructor(
                     .filter { it.ownerId == ownerUid }
                     .forEach { api.putData("messes", it.messId, it.copy(isApproved = shouldApprove)) }
             }
-
             Resource.Success(Unit)
         }.getOrElse { Resource.Error(it.message ?: "Failed to update owner") }
     }
 }
-

@@ -25,7 +25,8 @@ class OwnerUsersAdapter(
         fun bind(item: User) {
             binding.tvName.text = item.name
             binding.tvEmail.text = item.email
-            binding.tvStatus.text = "Status: ${item.status}"
+            // Using a default avatar placeholder for now
+            binding.ivUserAvatar.setImageResource(android.R.drawable.ic_menu_gallery)
             binding.root.setOnClickListener { onClick(item) }
         }
     }
@@ -36,4 +37,3 @@ class OwnerUsersAdapter(
         override fun areContentsTheSame(oldItem: User, newItem: User): Boolean = oldItem == newItem
     }
 }
-

@@ -2,30 +2,45 @@
 <resources>
 
     <!-- Typeface mapping: sans-serif-medium ~= Poppins semibold fallback, sans-serif ~= Inter fallback, monospace ~= Roboto Mono fallback -->
-    <style name="TextAppearance.MyMess.Admin.Heading" parent="TextAppearance.Material3.HeadlineSmall">
+    <style name="TextAppearance.MyMess.Admin.Heading" parent="TextAppearance.Material3.HeadlineMedium">
         <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textStyle">normal</item>
+        <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/admin_primary</item>
-        <item name="android:textSize">22sp</item>
+        <item name="android:textSize">24sp</item>
     </style>
 
-    <style name="TextAppearance.MyMess.Admin.Title" parent="TextAppearance.Material3.TitleMedium">
+    <style name="TextAppearance.MyMess.Admin.Title" parent="TextAppearance.Material3.TitleLarge">
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textColor">@color/admin_primary</item>
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="TextAppearance.MyMess.Admin.Body" parent="TextAppearance.Material3.BodyMedium">
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textColor">@color/admin_text_secondary</item>
-        <item name="android:textSize">15sp</item>
+        <item name="android:textSize">14sp</item>
     </style>
 
-    <style name="TextAppearance.MyMess.Admin.Data" parent="TextAppearance.Material3.TitleLarge">
-        <item name="android:fontFamily">monospace</item>
+    <style name="TextAppearance.MyMess.Admin.Label" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/admin_text_secondary</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="TextAppearance.MyMess.Admin.Data" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textColor">@color/admin_primary</item>
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="AdminCard" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">2dp</item>
+        <item name="cardBackgroundColor">@color/white</item>
+        <item name="strokeWidth">0dp</item>
     </style>
 
 </resources>
-

@@ -1,6 +1,5 @@
 package com.example.mymess.presentation.user
 
-import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,11 +13,15 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import coil.load
+import com.example.mymess.MainActivity
 import com.example.mymess.R
 import com.example.mymess.core.Resource
 import com.example.mymess.data.models.Meal
 import com.example.mymess.data.models.Mess
+import com.example.mymess.databinding.BottomSheetMessDetailsBinding
 import com.example.mymess.databinding.FragmentUserMessesBinding
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -89,38 +92,56 @@ class UserMessesFragment : Fragment() {
         viewModel.loadMenuForMess(mess.messId)
     }
 
-    private fun showMessDetailsDialog(mess: Mess, meals: List<Meal>) {
-        val menuText = if (meals.isEmpty()) {
-            "No meals available right now"
-        } else {
-            meals.joinToString(separator = "\n") { "- ${it.name}: Rs ${it.price}" }
+    private fun showMessDetailsBottomSheet(mess: Mess, meals: List<Meal>) {
+        val sheetBinding = BottomSheetMessDetailsBinding.inflate(layoutInflater)
+        val dialog = BottomSheetDialog(requireContext())
+        dialog.setContentView(sheetBinding.root)
+
+        sheetBinding.ivMessImage.load(mess.imageUrl) {
+            placeholder(android.R.drawable.ic_menu_gallery)
+            error(android.R.drawable.ic_menu_gallery)
         }
-        AlertDialog.Builder(requireContext())
-            .setTitle(mess.name)
-            .setMessage("${mess.address}, ${mess.city}\nContact: ${mess.contact}\n\n${mess.description}\n\nMenu:\n$menuText")
-            .setPositiveButton("Request to Join") { _, _ -> viewModel.requestJoinMess(mess.messId) }
-            .setNegativeButton("Close", null)
-            .show()
+        sheetBinding.tvMessName.text = mess.name
+        sheetBinding.tvMessLocation.text = "${mess.address}, ${mess.city}"
+        sheetBinding.tvMessContact.text = mess.contact
+        sheetBinding.tvMessDescription.text = mess.description.ifBlank { "No description available" }
+
+        val menuAdapter = MealAdapter(onMealClick = { /* Can view details here if needed */ })
+        sheetBinding.rvMessMenu.layoutManager = LinearLayoutManager(requireContext())
+        sheetBinding.rvMessMenu.adapter = menuAdapter
+        menuAdapter.submitList(meals)
+
+        sheetBinding.tvMenuEmpty.visibility = if (meals.isEmpty()) View.VISIBLE else View.GONE
+        
+        sheetBinding.btnJoinMess.setOnClickListener {
+            viewModel.requestJoinMess(mess.messId)
+            dialog.dismiss()
+        }
+        
+        sheetBinding.btnClose.setOnClickListener { dialog.dismiss() }
+
+        dialog.show()
     }
 
     private fun observeUi() {
+        val mainActivity = activity as? MainActivity
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.messesState.collect { state ->
                         when (state) {
                             is Resource.Error -> {
-                                binding.progressBar.visibility = View.GONE
+                                mainActivity?.hideLoader()
                                 binding.tvInfo.text = state.message
                             }
 
                             Resource.Loading -> {
-                                binding.progressBar.visibility = View.VISIBLE
+                                mainActivity?.showLoader("Finding messes near you...")
                                 binding.tvInfo.text = "Loading approved messes..."
                             }
 
                             is Resource.Success -> {
-                                binding.progressBar.visibility = View.GONE
+                                mainActivity?.hideLoader()
                                 allMesses = state.data
                                 adapter.submitList(state.data)
                                 binding.tvInfo.text = if (state.data.isEmpty()) {
@@ -136,10 +157,17 @@ class UserMessesFragment : Fragment() {
                 launch {
                     viewModel.selectedMessMenuState.collect { state ->
                         when (state) {
-                            is Resource.Error -> Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
-                            Resource.Loading -> Unit
+                            is Resource.Error -> {
+                                mainActivity?.hideLoader()
+                                Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                            }
+                            Resource.Loading -> mainActivity?.showLoader("Loading menu...")
                             is Resource.Success -> {
-                                selectedMessForDetails?.let { showMessDetailsDialog(it, state.data) }
+                                mainActivity?.hideLoader()
+                                selectedMessForDetails?.let { 
+                                    showMessDetailsBottomSheet(it, state.data)
+                                    selectedMessForDetails = null // Reset after showing
+                                }
                             }
                         }
                     }
@@ -148,9 +176,15 @@ class UserMessesFragment : Fragment() {
                 launch {
                     viewModel.joinState.collect { state ->
                         when (state) {
-                            is Resource.Error -> Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
-                            Resource.Loading -> Unit
-                            is Resource.Success -> Toast.makeText(requireContext(), "Join request sent", Toast.LENGTH_SHORT).show()
+                            is Resource.Error -> {
+                                mainActivity?.hideLoader()
+                                Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                            }
+                            Resource.Loading -> mainActivity?.showLoader("Sending request...")
+                            is Resource.Success -> {
+                                mainActivity?.hideLoader()
+                                Toast.makeText(requireContext(), "Join request sent", Toast.LENGTH_SHORT).show()
+                            }
                             null -> Unit
                         }
                     }

@@ -1,7 +1,9 @@
 package com.example.mymess.presentation.admin
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mymess.core.ImageUploader
 import com.example.mymess.core.Resource
 import com.example.mymess.core.SessionManager
 import com.example.mymess.data.models.Banner
@@ -16,6 +18,7 @@ import kotlinx.coroutines.launch
 class AdminBannersViewModel @Inject constructor(
     private val bannerRepository: BannerRepository,
     private val sessionManager: SessionManager,
+    private val imageUploader: ImageUploader,
 ) : ViewModel() {
 
     private val _bannersState = MutableStateFlow<Resource<List<Banner>>>(Resource.Loading)
@@ -34,12 +37,18 @@ class AdminBannersViewModel @Inject constructor(
     fun save(
         editingBannerId: String?,
         title: String,
-        imageUrl: String,
+        imageUri: Uri?,
+        existingImageUrl: String?,
         targetRole: String,
         isActive: Boolean,
     ) {
-        if (title.isBlank() || imageUrl.isBlank()) {
-            _actionState.value = Resource.Error("Title and image URL are required")
+        if (title.isBlank()) {
+            _actionState.value = Resource.Error("Title is required")
+            return
+        }
+
+        if (imageUri == null && existingImageUrl.isNullOrBlank()) {
+            _actionState.value = Resource.Error("Image is required")
             return
         }
 
@@ -51,11 +60,25 @@ class AdminBannersViewModel @Inject constructor(
 
         viewModelScope.launch {
             _actionState.value = Resource.Loading
+            
+            val finalImageUrl = if (imageUri != null) {
+                when (val uploadResult = imageUploader.uploadImage(imageUri)) {
+                    is Resource.Success -> uploadResult.data
+                    is Resource.Error -> {
+                        _actionState.value = Resource.Error("Upload failed: ${uploadResult.message}")
+                        return@launch
+                    }
+                    Resource.Loading -> return@launch // Should not happen with current impl
+                }
+            } else {
+                existingImageUrl ?: ""
+            }
+
             val result = bannerRepository.saveBanner(
                 Banner(
                     bannerId = editingBannerId.orEmpty(),
                     title = title.trim(),
-                    imageUrl = imageUrl.trim(),
+                    imageUrl = finalImageUrl,
                     targetRole = role,
                     isActive = isActive,
                     createdBy = sessionManager.getUid(),
@@ -82,4 +105,3 @@ class AdminBannersViewModel @Inject constructor(
         }
     }
 }
-

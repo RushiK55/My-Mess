@@ -6,6 +6,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
@@ -38,10 +39,16 @@ interface FirebaseApi {
         @Body data: Any,
     ): Response<JsonObject>
 
+    @PATCH("{path}/{id}.json")
+    suspend fun patchData(
+        @Path("path") path: String,
+        @Path("id") id: String,
+        @Body data: Map<String, @JvmSuppressWildcards Any?>,
+    ): Response<JsonObject>
+
     @DELETE("{path}/{id}.json")
     suspend fun deleteData(
         @Path("path") path: String,
         @Path("id") id: String,
     ): Response<JsonObject>
 }
-

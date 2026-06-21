@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical">
 
     <LinearLayout
@@ -53,7 +54,8 @@
                 android:id="@+id/actDateFilter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="none" />
+                android:inputType="none"
+                android:padding="12dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -67,7 +69,8 @@
                 android:id="@+id/actStatusFilter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="none" />
+                android:inputType="none"
+                android:padding="12dp" />
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
 
@@ -75,6 +78,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        android:visibility="gone"
         android:orientation="horizontal">
 
         <com.google.android.material.button.MaterialButton
@@ -97,7 +101,9 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginTop="12dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            tools:itemCount="1"
+            tools:listitem="@layout/item_order_history"/>
     </LinearLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView

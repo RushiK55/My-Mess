@@ -106,17 +106,25 @@ class AuthRepositoryImpl @Inject constructor(
         }.getOrElse { Resource.Error(it.message ?: "Unable to verify session") }
     }
 
-    override suspend fun updateUserProfile(uid: String, name: String, phone: String): Resource<User> {
+    override suspend fun updateUserProfile(uid: String, name: String, phone: String, profilePic: String?): Resource<User> {
         if (uid.isBlank()) return Resource.Error("Invalid session")
         if (name.isBlank() || phone.isBlank()) return Resource.Error("Name and phone are required")
+        
         return runCatching {
-            val current = getUserByUid(uid)
-            if (current !is Resource.Success) {
-                return current as? Resource.Error ?: Resource.Error("Unable to fetch profile")
+            val updates = mutableMapOf<String, Any?>(
+                "name" to name.trim(),
+                "phone" to phone.trim()
+            )
+            if (profilePic != null) {
+                updates["profilePic"] = profilePic
             }
-            val updated = current.data.copy(name = name.trim(), phone = phone.trim())
-            val response = api.putData("users", uid, updated)
-            if (response.isSuccessful) Resource.Success(updated) else Resource.Error("Failed to update profile")
+            
+            val response = api.patchData("users", uid, updates)
+            if (response.isSuccessful) {
+                getUserByUid(uid)
+            } else {
+                Resource.Error("Failed to update profile: ${response.message()}")
+            }
         }.getOrElse { Resource.Error(it.message ?: "Failed to update profile") }
     }
 
@@ -134,8 +142,8 @@ class AuthRepositoryImpl @Inject constructor(
             val matchedUser = users.values.firstOrNull { it.email.equals(email.trim(), ignoreCase = true) }
                 ?: return Resource.Error("No account found for this email")
 
-            val updated = matchedUser.copy(password = newPassword)
-            val updateResponse = api.putData("users", matchedUser.uid, updated)
+            val updates = mapOf("password" to newPassword)
+            val updateResponse = api.patchData("users", matchedUser.uid, updates)
             if (updateResponse.isSuccessful) Resource.Success(Unit) else Resource.Error("Failed to reset password")
         }.getOrElse { Resource.Error(it.message ?: "Failed to reset password") }
     }
@@ -153,11 +161,9 @@ class AuthRepositoryImpl @Inject constructor(
             if (current.data.password != currentPassword) {
                 return Resource.Error("Current password is incorrect")
             }
-            val updated = current.data.copy(password = newPassword)
-            val response = api.putData("users", uid, updated)
+            val updates = mapOf("password" to newPassword)
+            val response = api.patchData("users", uid, updates)
             if (response.isSuccessful) Resource.Success(Unit) else Resource.Error("Failed to update password")
         }.getOrElse { Resource.Error(it.message ?: "Failed to update password") }
     }
 }
-
-
